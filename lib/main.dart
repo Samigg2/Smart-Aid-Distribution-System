@@ -65,7 +65,7 @@ class WelcomePage extends StatelessWidget {
               Text(
                 'Distribution System',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 17,
                   fontWeight: FontWeight.w500,
                   color: Colors.blue[600],
                 ),
