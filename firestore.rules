@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user data
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && getUserData().role == 'admin';
+    }
+    
+    // Helper function to check if user is active
+    function isActive() {
+      return isAuthenticated() && getUserData().isActive == true;
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Admins can read all users
+      // Users can read their own data
+      allow read: if isAuthenticated() && (isAdmin() || request.auth.uid == userId);
+      
+      // Only admins can create users
+      allow create: if isAdmin();
+      
+      // Admins can update any user
+      // Users can update their own data (except role and isActive fields)
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == userId && 
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive']))
+      );
+      
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+    
+    // Beneficiaries collection (example for future use)
+    match /beneficiaries/{beneficiaryId} {
+      // Staff and admins can read beneficiaries
+      allow read: if isAuthenticated() && isActive();
+      
+      // Staff and admins can create beneficiaries
+      allow create: if isAuthenticated() && isActive();
+      
+      // Admins can update any beneficiary
+      // Staff can only update beneficiaries they created
+      allow update: if isAuthenticated() && isActive() && (
+        isAdmin() || 
+        resource.data.createdBy == request.auth.uid
+      );
+      
+      // Only admins can delete beneficiaries
+      allow delete: if isAdmin();
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

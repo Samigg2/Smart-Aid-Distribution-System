@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "819376937996",
+    "project_id": "smartaid-aef0b",
+    "storage_bucket": "smartaid-aef0b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819376937996:android:5b4bfc8e8cbb30691f6229",
+        "android_client_info": {
+          "package_name": "com.example.test_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819376937996-uc82j9o79u153caq9flu1cj7v5b3s6vh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAdBEdl01FRBMYoLqwU4be5e1Q-PgMIWI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819376937996-uc82j9o79u153caq9flu1cj7v5b3s6vh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "819376937996-l78u0c1rhk4jvo30gm1f1rb0ma11c1i9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.testApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
