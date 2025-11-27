@@ -70,25 +70,33 @@ class AuthService {
   }
 
   // Create new user (admin only)
+  // Note: This will temporarily log out the admin and log them back in
   Future<bool> createUser({
     required String email,
     required String password,
     required String fullName,
     required String phone,
     required String role,
+    required String adminEmail,
+    required String adminPassword,
   }) async {
     try {
+      // Store current admin UID
+      String? currentAdminUid = _auth.currentUser?.uid;
+      
       // Create user in Firebase Auth
+      // WARNING: This will log out the current admin temporarily
       UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      User? user = result.user;
+      User? newUser = result.user;
 
-      if (user != null) {
+      if (newUser != null) {
         // Create user document in Firestore
-        await _firestore.collection('users').doc(user.uid).set({
+        // Use the new user's UID for the document
+        await _firestore.collection('users').doc(newUser.uid).set({
           'email': email,
           'fullName': fullName,
           'phone': phone,
@@ -98,11 +106,28 @@ class AuthService {
           'lastLogin': null,
         });
 
+        // Sign out the newly created user
+        await _auth.signOut();
+
+        // Sign back in as admin
+        await _auth.signInWithEmailAndPassword(
+          email: adminEmail,
+          password: adminPassword,
+        );
+
         Fluttertoast.showToast(msg: 'User created successfully');
         return true;
       }
       return false;
     } on FirebaseAuthException catch (e) {
+      // Try to log back in as admin even if there was an error
+      try {
+        await _auth.signInWithEmailAndPassword(
+          email: adminEmail,
+          password: adminPassword,
+        );
+      } catch (_) {}
+
       String message = 'Failed to create user';
       if (e.code == 'email-already-in-use') {
         message = 'This email is already registered';
@@ -114,6 +139,14 @@ class AuthService {
       Fluttertoast.showToast(msg: message);
       return false;
     } catch (e) {
+      // Try to log back in as admin
+      try {
+        await _auth.signInWithEmailAndPassword(
+          email: adminEmail,
+          password: adminPassword,
+        );
+      } catch (_) {}
+      
       Fluttertoast.showToast(msg: 'Error: ${e.toString()}');
       return false;
     }
