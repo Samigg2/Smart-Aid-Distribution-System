@@ -28,8 +28,8 @@ service cloud.firestore {
       // Users can read their own data
       allow read: if isAuthenticated() && (isAdmin() || request.auth.uid == userId);
       
-      // Only admins can create users
-      allow create: if isAdmin();
+      // Admins can create users OR a user can create their own document (for initial signup)
+      allow create: if isAuthenticated() && (isAdmin() || request.auth.uid == userId);
       
       // Admins can update any user
       // Users can update their own data (except role and isActive fields)

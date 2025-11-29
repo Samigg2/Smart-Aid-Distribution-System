@@ -14,7 +14,10 @@ class AuthService {
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // Sign in with email and password
-  Future<UserModel?> signInWithEmailPassword(String email, String password) async {
+  Future<UserModel?> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     try {
       UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -24,8 +27,11 @@ class AuthService {
 
       if (user != null) {
         // Get user data from Firestore
-        DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
-        
+        DocumentSnapshot userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
         if (!userDoc.exists) {
           await signOut();
           Fluttertoast.showToast(msg: 'User data not found');
@@ -70,22 +76,18 @@ class AuthService {
   }
 
   // Create new user (admin only)
-  // Note: This will temporarily log out the admin and log them back in
+  // Note: This will sign out the current admin after creating the user
+  // The admin will need to log back in
   Future<bool> createUser({
     required String email,
     required String password,
     required String fullName,
     required String phone,
     required String role,
-    required String adminEmail,
-    required String adminPassword,
   }) async {
     try {
-      // Store current admin UID
-      String? currentAdminUid = _auth.currentUser?.uid;
-      
       // Create user in Firebase Auth
-      // WARNING: This will log out the current admin temporarily
+      // Note: This automatically signs in the new user and signs out the admin
       UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -94,8 +96,8 @@ class AuthService {
       User? newUser = result.user;
 
       if (newUser != null) {
-        // Create user document in Firestore
-        // Use the new user's UID for the document
+        // Create user document in Firestore (the new user is now authenticated)
+        // With updated Firestore rules, the user can create their own document
         await _firestore.collection('users').doc(newUser.uid).set({
           'email': email,
           'fullName': fullName,
@@ -106,28 +108,18 @@ class AuthService {
           'lastLogin': null,
         });
 
-        // Sign out the newly created user
+        // Sign out the new user
+        // The admin will be redirected to login screen automatically
         await _auth.signOut();
 
-        // Sign back in as admin
-        await _auth.signInWithEmailAndPassword(
-          email: adminEmail,
-          password: adminPassword,
+        Fluttertoast.showToast(
+          msg: 'User created! You have been signed out. Please log in again.',
+          toastLength: Toast.LENGTH_LONG,
         );
-
-        Fluttertoast.showToast(msg: 'User created successfully');
         return true;
       }
       return false;
     } on FirebaseAuthException catch (e) {
-      // Try to log back in as admin even if there was an error
-      try {
-        await _auth.signInWithEmailAndPassword(
-          email: adminEmail,
-          password: adminPassword,
-        );
-      } catch (_) {}
-
       String message = 'Failed to create user';
       if (e.code == 'email-already-in-use') {
         message = 'This email is already registered';
@@ -139,14 +131,6 @@ class AuthService {
       Fluttertoast.showToast(msg: message);
       return false;
     } catch (e) {
-      // Try to log back in as admin
-      try {
-        await _auth.signInWithEmailAndPassword(
-          email: adminEmail,
-          password: adminPassword,
-        );
-      } catch (_) {}
-      
       Fluttertoast.showToast(msg: 'Error: ${e.toString()}');
       return false;
     }
@@ -158,8 +142,11 @@ class AuthService {
       User? user = currentUser;
       if (user == null) return null;
 
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
-      
+      DocumentSnapshot userDoc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
       if (!userDoc.exists) return null;
 
       return UserModel.fromFirestore(userDoc);
@@ -200,4 +187,3 @@ class AuthService {
     }
   }
 }
-

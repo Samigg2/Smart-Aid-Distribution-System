@@ -160,7 +160,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.5,
+                childAspectRatio: 1.6,
                 children: [
                   _buildStatCard(
                     'Total Users',
@@ -239,31 +239,31 @@ class _AdminDashboardState extends State<AdminDashboard> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 32, color: color),
-            const SizedBox(height: 6),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                value,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+            Icon(icon, size: 24, color: color),
+            const SizedBox(height: 3),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
-            const SizedBox(height: 4),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            const SizedBox(height: 2),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[600],
+                height: 1.0,
               ),
             ),
           ],
@@ -331,7 +331,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final passwordController = TextEditingController();
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
-    final adminPasswordController = TextEditingController();
     String selectedRole = 'staff';
 
     showDialog(
@@ -405,32 +404,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ],
                   onChanged: (value) => selectedRole = value!,
                 ),
-                const SizedBox(height: 20),
-                const Divider(),
-                const SizedBox(height: 8),
-                Text(
-                  'Confirm your admin password',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: adminPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Your Admin Password',
-                    prefixIcon: Icon(Icons.admin_panel_settings),
-                    hintText: 'Required for security',
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true)
-                      return 'Admin password required';
-                    return null;
-                  },
-                ),
               ],
             ),
           ),
@@ -445,7 +418,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               if (formKey.currentState!.validate()) {
                 Navigator.pop(context);
 
-                // Show loading indicator
+                // Show loading dialog
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -453,22 +426,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       const Center(child: CircularProgressIndicator()),
                 );
 
-                bool success = await _authService.createUser(
+                await _authService.createUser(
                   email: emailController.text.trim(),
                   password: passwordController.text,
                   fullName: nameController.text.trim(),
                   phone: phoneController.text.trim(),
                   role: selectedRole,
-                  adminEmail: _currentUser?.email ?? '',
-                  adminPassword: adminPasswordController.text,
                 );
 
-                // Close loading indicator
-                if (context.mounted) Navigator.pop(context);
-
-                if (success) {
-                  _loadStatistics();
+                // Close loading dialog if still mounted
+                if (mounted) {
+                  Navigator.of(context).pop();
                 }
+
+                // Note: If successful, the admin will be signed out and
+                // AuthWrapper will redirect to login screen automatically
               }
             },
             child: const Text('Create'),
