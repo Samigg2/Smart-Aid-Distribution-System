@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/beneficiary_model.dart';
 import '../providers/beneficiary_provider.dart';
+import '../providers/auth_provider.dart';
 import 'beneficiary_registration_screen.dart';
 import 'beneficiary_detail_screen.dart';
 
@@ -22,9 +23,15 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
-    final beneficiariesAsync = currentUser != null
-        ? ref.watch(beneficiariesByStaffProvider(currentUser.uid))
-        : ref.watch(allBeneficiariesProvider);
+    final userDataAsync = ref.watch(currentUserDataStreamProvider);
+    
+    // Determine which provider to use based on user role
+    final isAdminUser = userDataAsync.value?.isAdmin ?? false;
+    final beneficiariesAsync = isAdminUser
+        ? ref.watch(allBeneficiariesProvider) // Admin sees all
+        : currentUser != null
+            ? ref.watch(beneficiariesByStaffProvider(currentUser.uid)) // Staff sees own
+            : ref.watch(allBeneficiariesProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -193,9 +200,15 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
 
                 return RefreshIndicator(
                   onRefresh: () async {
-                    ref.invalidate(
-                      beneficiariesByStaffProvider(currentUser!.uid),
-                    );
+                    final userData = ref.read(currentUserDataStreamProvider).value;
+                    final isAdminCheck = userData?.isAdmin ?? false;
+                    if (isAdminCheck) {
+                      ref.invalidate(allBeneficiariesProvider);
+                    } else if (currentUser != null) {
+                      ref.invalidate(
+                        beneficiariesByStaffProvider(currentUser.uid),
+                      );
+                    }
                   },
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16.0),
@@ -233,7 +246,11 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            if (currentUser != null) {
+                            final userData = ref.read(currentUserDataStreamProvider).value;
+                            final isAdminUser = userData?.isAdmin ?? false;
+                            if (isAdminUser) {
+                              ref.invalidate(allBeneficiariesProvider);
+                            } else if (currentUser != null) {
                               ref.invalidate(
                                 beneficiariesByStaffProvider(currentUser.uid),
                               );

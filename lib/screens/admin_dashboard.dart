@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/firestore_provider.dart';
 import 'login_screen.dart';
 import 'user_management_screen.dart';
+import 'beneficiary_list_screen.dart';
 
 class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
@@ -179,6 +180,21 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               const SizedBox(height: 12),
 
               // Action Buttons
+              _buildActionButton(
+                'View Beneficiaries',
+                'View all registered beneficiaries',
+                Icons.people,
+                Colors.purple,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BeneficiaryListScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
               _buildActionButton(
                 'Manage Users',
                 'View, edit, and manage all users',

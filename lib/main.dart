@@ -44,6 +44,13 @@ class SmartAidApp extends StatelessWidget {
       ),
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
+      // Set background color to prevent black screen
+      builder: (context, child) {
+        return Container(
+          color: Colors.white,
+          child: child ?? const SizedBox(),
+        );
+      },
     );
   }
 }

@@ -12,21 +12,38 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
     
-    // Helper function to check if user is admin
+    // Helper function to check if user is admin (with error handling)
+    // Note: This should NOT be used in users collection rules to avoid circular dependency
     function isAdmin() {
-      return isAuthenticated() && getUserData().role == 'admin';
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             getUserData().role == 'admin';
     }
     
-    // Helper function to check if user is active
+    // Helper function to check if user is active (with error handling)
     function isActive() {
-      return isAuthenticated() && getUserData().isActive == true;
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             getUserData().isActive == true;
+    }
+    
+    // Helper function to check if user is admin by reading their own document
+    // Use this in users collection to avoid circular dependency
+    function isAdminByOwnDoc() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
     
     // Users collection rules
     match /users/{userId} {
-      // Admins can read all users
-      // Users can read their own data
-      allow read: if isAuthenticated() && (isAdmin() || request.auth.uid == userId);
+      // Users can always read their own data
+      // Admins can read all users (check their own doc, not the target doc)
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
       
       // Admins can create users OR a user can create their own document (for initial signup)
       allow create: if isAuthenticated() && (isAdmin() || request.auth.uid == userId);
@@ -45,17 +62,26 @@ service cloud.firestore {
     
     // Beneficiaries collection
     match /beneficiaries/{beneficiaryId} {
-      // Staff and admins can read beneficiaries
-      allow read: if isAuthenticated() && isActive();
+      // Admins can read all beneficiaries
+      // Staff can read all beneficiaries (for now, can restrict later if needed)
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && isActive())
+      );
       
       // Staff and admins can create beneficiaries
-      allow create: if isAuthenticated() && isActive();
+      allow create: if isAuthenticated() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && isActive())
+      );
       
       // Admins can update any beneficiary
       // Staff can only update beneficiaries they registered
-      allow update: if isAuthenticated() && isActive() && (
+      allow update: if isAuthenticated() && (
         isAdmin() || 
-        resource.data.registeredBy == request.auth.uid
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         isActive() && 
+         resource.data.registeredBy == request.auth.uid)
       );
       
       // Only admins can delete beneficiaries
