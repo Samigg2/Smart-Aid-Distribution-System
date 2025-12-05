@@ -43,7 +43,7 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Beneficiaries collection (example for future use)
+    // Beneficiaries collection
     match /beneficiaries/{beneficiaryId} {
       // Staff and admins can read beneficiaries
       allow read: if isAuthenticated() && isActive();
@@ -52,10 +52,10 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isActive();
       
       // Admins can update any beneficiary
-      // Staff can only update beneficiaries they created
+      // Staff can only update beneficiaries they registered
       allow update: if isAuthenticated() && isActive() && (
         isAdmin() || 
-        resource.data.createdBy == request.auth.uid
+        resource.data.registeredBy == request.auth.uid
       );
       
       // Only admins can delete beneficiaries

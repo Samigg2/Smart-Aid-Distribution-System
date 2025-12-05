@@ -45,5 +45,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permissions for beneficiary registration -->
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to capture beneficiary photos for registration</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to select beneficiary photos</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need location access to record GPS coordinates for beneficiary registration</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need location access to record GPS coordinates for beneficiary registration</string>
 </dict>
 </plist>

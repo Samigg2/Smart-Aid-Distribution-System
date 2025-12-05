@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
+import 'beneficiary_registration_screen.dart';
+import 'beneficiary_list_screen.dart';
 
 class StaffDashboard extends ConsumerStatefulWidget {
   const StaffDashboard({super.key});
@@ -131,11 +133,23 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                         ),
                       ),
                       const Divider(height: 24),
-                      _buildInfoRow(Icons.person, 'Name', currentUser?.fullName ?? '-'),
+                      _buildInfoRow(
+                        Icons.person,
+                        'Name',
+                        currentUser?.fullName ?? '-',
+                      ),
                       const SizedBox(height: 12),
-                      _buildInfoRow(Icons.email, 'Email', currentUser?.email ?? '-'),
+                      _buildInfoRow(
+                        Icons.email,
+                        'Email',
+                        currentUser?.email ?? '-',
+                      ),
                       const SizedBox(height: 12),
-                      _buildInfoRow(Icons.phone, 'Phone', currentUser?.phone ?? '-'),
+                      _buildInfoRow(
+                        Icons.phone,
+                        'Phone',
+                        currentUser?.phone ?? '-',
+                      ),
                       const SizedBox(height: 12),
                       _buildInfoRow(
                         Icons.badge,
@@ -157,10 +171,7 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
               // Quick Actions Section
               const Text(
                 'Quick Actions',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
 
@@ -171,9 +182,11 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                 Icons.person_add,
                 Colors.green,
                 () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Beneficiary registration feature coming soon'),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const BeneficiaryRegistrationScreen(),
                     ),
                   );
                 },
@@ -185,9 +198,10 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                 Icons.list_alt,
                 Colors.blue,
                 () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Records view feature coming soon'),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BeneficiaryListScreen(),
                     ),
                   );
                 },
@@ -229,10 +243,7 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ],
@@ -248,9 +259,7 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
   ) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -281,10 +290,7 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -297,4 +303,3 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
     );
   }
 }
-
