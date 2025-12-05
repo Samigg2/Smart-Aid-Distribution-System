@@ -1,55 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../services/auth_service.dart';
-import '../models/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../screens/login_screen.dart';
 import '../screens/admin_dashboard.dart';
 import '../screens/staff_dashboard.dart';
+import '../providers/auth_provider.dart';
 import 'loading_widget.dart';
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final authService = AuthService();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateChangesProvider);
+    final userDataAsync = ref.watch(currentUserDataStreamProvider);
 
-    return StreamBuilder<User?>(
-      stream: authService.authStateChanges,
-      builder: (context, snapshot) {
-        // Show loading while checking auth state
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const LoadingWidget();
-        }
-
-        // User is not logged in
-        if (!snapshot.hasData) {
+    return authState.when(
+      data: (user) {
+        if (user == null) {
           return const LoginScreen();
         }
 
-        // User is logged in - get user data and route accordingly
-        return FutureBuilder<UserModel?>(
-          future: authService.getCurrentUserData(),
-          builder: (context, userSnapshot) {
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
-              return const LoadingWidget();
-            }
-
-            if (!userSnapshot.hasData) {
+        return userDataAsync.when(
+          data: (userModel) {
+            if (userModel == null) {
               return const LoginScreen();
             }
 
-            UserModel user = userSnapshot.data!;
-
             // Route based on user role
-            if (user.isAdmin) {
+            if (userModel.isAdmin) {
               return const AdminDashboard();
             } else {
               return const StaffDashboard();
             }
           },
+          loading: () => const LoadingWidget(),
+          error: (_, __) => const LoginScreen(),
         );
       },
+      loading: () => const LoadingWidget(),
+      error: (_, __) => const LoginScreen(),
     );
   }
 }

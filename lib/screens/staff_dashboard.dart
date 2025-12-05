@@ -1,32 +1,19 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../models/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 
-class StaffDashboard extends StatefulWidget {
+class StaffDashboard extends ConsumerStatefulWidget {
   const StaffDashboard({super.key});
 
   @override
-  State<StaffDashboard> createState() => _StaffDashboardState();
+  ConsumerState<StaffDashboard> createState() => _StaffDashboardState();
 }
 
-class _StaffDashboardState extends State<StaffDashboard> {
-  final _authService = AuthService();
-  UserModel? _currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    UserModel? user = await _authService.getCurrentUserData();
-    setState(() => _currentUser = user);
-  }
-
+class _StaffDashboardState extends ConsumerState<StaffDashboard> {
   Future<void> _handleLogout() async {
-    await _authService.signOut();
+    final authService = ref.read(authServiceProvider);
+    await authService.signOut();
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -36,6 +23,9 @@ class _StaffDashboardState extends State<StaffDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final userDataAsync = ref.watch(currentUserDataStreamProvider);
+    final currentUser = userDataAsync.value;
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -52,7 +42,9 @@ class _StaffDashboardState extends State<StaffDashboard> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadUserData,
+        onRefresh: () async {
+          ref.invalidate(currentUserDataStreamProvider);
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
@@ -95,7 +87,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _currentUser?.fullName ?? 'Staff',
+                                  currentUser?.fullName ?? 'Staff',
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -103,7 +95,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  _currentUser?.email ?? '',
+                                  currentUser?.email ?? '',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.grey[600],
@@ -139,22 +131,22 @@ class _StaffDashboardState extends State<StaffDashboard> {
                         ),
                       ),
                       const Divider(height: 24),
-                      _buildInfoRow(Icons.person, 'Name', _currentUser?.fullName ?? '-'),
+                      _buildInfoRow(Icons.person, 'Name', currentUser?.fullName ?? '-'),
                       const SizedBox(height: 12),
-                      _buildInfoRow(Icons.email, 'Email', _currentUser?.email ?? '-'),
+                      _buildInfoRow(Icons.email, 'Email', currentUser?.email ?? '-'),
                       const SizedBox(height: 12),
-                      _buildInfoRow(Icons.phone, 'Phone', _currentUser?.phone ?? '-'),
+                      _buildInfoRow(Icons.phone, 'Phone', currentUser?.phone ?? '-'),
                       const SizedBox(height: 12),
                       _buildInfoRow(
                         Icons.badge,
                         'Role',
-                        _currentUser?.role.toUpperCase() ?? '-',
+                        currentUser?.role.toUpperCase() ?? '-',
                       ),
                       const SizedBox(height: 12),
                       _buildInfoRow(
                         Icons.check_circle,
                         'Status',
-                        _currentUser?.isActive ?? false ? 'Active' : 'Inactive',
+                        currentUser?.isActive ?? false ? 'Active' : 'Inactive',
                       ),
                     ],
                   ),

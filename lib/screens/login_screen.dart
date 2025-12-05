@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
+import '../providers/auth_provider.dart';
 import 'admin_dashboard.dart';
 import 'staff_dashboard.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends ConsumerState<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
   late AnimationController _animationController;
@@ -32,10 +33,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
     _animationController.forward();
   }
 
@@ -52,7 +56,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
     setState(() => _isLoading = true);
 
-    UserModel? user = await _authService.signInWithEmailPassword(
+    final authService = ref.read(authServiceProvider);
+    UserModel? user = await authService.signInWithEmailPassword(
       _emailController.text.trim(),
       _passwordController.text,
     );
@@ -81,7 +86,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       return;
     }
 
-    await _authService.resetPassword(_emailController.text.trim());
+    final authService = ref.read(authServiceProvider);
+    await authService.resetPassword(_emailController.text.trim());
   }
 
   @override
@@ -92,11 +98,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Colors.blue[700]!,
-              Colors.blue[500]!,
-              Colors.cyan[400]!,
-            ],
+            colors: [Colors.blue[700]!, Colors.blue[500]!, Colors.cyan[400]!],
           ),
         ),
         child: SafeArea(
@@ -139,7 +141,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     height: 90,
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
-                                        colors: [Colors.blue[700]!, Colors.cyan[400]!],
+                                        colors: [
+                                          Colors.blue[700]!,
+                                          Colors.cyan[400]!,
+                                        ],
                                       ),
                                       shape: BoxShape.circle,
                                       boxShadow: [
@@ -189,21 +194,33 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   decoration: InputDecoration(
                                     labelText: 'Email Address',
                                     hintText: 'your.email@example.com',
-                                    prefixIcon: Icon(Icons.email_rounded, color: Colors.blue[700]),
+                                    prefixIcon: Icon(
+                                      Icons.email_rounded,
+                                      color: Colors.blue[700],
+                                    ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey[300]!,
+                                        width: 1.5,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Colors.blue[700]!, width: 2),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue[700]!,
+                                        width: 2,
+                                      ),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 18,
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -225,7 +242,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   decoration: InputDecoration(
                                     labelText: 'Password',
                                     hintText: '••••••••',
-                                    prefixIcon: Icon(Icons.lock_rounded, color: Colors.blue[700]),
+                                    prefixIcon: Icon(
+                                      Icons.lock_rounded,
+                                      color: Colors.blue[700],
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
@@ -234,7 +254,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         color: Colors.grey[600],
                                       ),
                                       onPressed: () {
-                                        setState(() => _obscurePassword = !_obscurePassword);
+                                        setState(
+                                          () => _obscurePassword =
+                                              !_obscurePassword,
+                                        );
                                       },
                                     ),
                                     border: OutlineInputBorder(
@@ -242,15 +265,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey[300]!,
+                                        width: 1.5,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: BorderSide(color: Colors.blue[700]!, width: 2),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue[700]!,
+                                        width: 2,
+                                      ),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[50],
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 18,
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -268,7 +300,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
-                                    onPressed: _isLoading ? null : _handleForgotPassword,
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleForgotPassword,
                                     style: TextButton.styleFrom(
                                       foregroundColor: Colors.blue[700],
                                     ),
@@ -303,7 +337,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                             width: 24,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2.5,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.white,
+                                                  ),
                                             ),
                                           )
                                         : const Text(
@@ -327,7 +364,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   ),
                                   child: Row(
                                     children: [
-                                      Icon(Icons.info_rounded, color: Colors.blue[700], size: 20),
+                                      Icon(
+                                        Icons.info_rounded,
+                                        color: Colors.blue[700],
+                                        size: 20,
+                                      ),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
@@ -358,4 +399,3 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 }
-

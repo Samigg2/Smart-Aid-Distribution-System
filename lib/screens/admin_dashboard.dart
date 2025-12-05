@@ -1,47 +1,21 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
-import '../models/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth_provider.dart';
+import '../providers/firestore_provider.dart';
 import 'login_screen.dart';
 import 'user_management_screen.dart';
 
-class AdminDashboard extends StatefulWidget {
+class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
 
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  ConsumerState<AdminDashboard> createState() => _AdminDashboardState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
-  final _authService = AuthService();
-  final _firestoreService = FirestoreService();
-  UserModel? _currentUser;
-  Map<String, int> _statistics = {
-    'total': 0,
-    'admins': 0,
-    'staff': 0,
-    'active': 0,
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-    _loadStatistics();
-  }
-
-  Future<void> _loadUserData() async {
-    UserModel? user = await _authService.getCurrentUserData();
-    setState(() => _currentUser = user);
-  }
-
-  Future<void> _loadStatistics() async {
-    Map<String, int> stats = await _firestoreService.getUserStatistics();
-    setState(() => _statistics = stats);
-  }
-
+class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   Future<void> _handleLogout() async {
-    await _authService.signOut();
+    final authService = ref.read(authServiceProvider);
+    await authService.signOut();
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -51,6 +25,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final userDataAsync = ref.watch(currentUserDataStreamProvider);
+    final statisticsAsync = ref.watch(userStatisticsProvider);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -62,8 +39,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              _loadStatistics();
-              setState(() {});
+              ref.invalidate(userStatisticsProvider);
+              ref.invalidate(currentUserDataStreamProvider);
             },
             tooltip: 'Refresh',
           ),
@@ -76,8 +53,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await _loadStatistics();
-          await _loadUserData();
+          ref.invalidate(userStatisticsProvider);
+          ref.invalidate(currentUserDataStreamProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -121,7 +98,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _currentUser?.fullName ?? 'Admin',
+                                  userDataAsync.value?.fullName ?? 'Admin',
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -129,7 +106,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  _currentUser?.email ?? '',
+                                  userDataAsync.value?.email ?? '',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.grey[600],
@@ -154,39 +131,43 @@ class _AdminDashboardState extends State<AdminDashboard> {
               const SizedBox(height: 12),
 
               // Statistics Cards Grid
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.6,
-                children: [
-                  _buildStatCard(
-                    'Total Users',
-                    _statistics['total'].toString(),
-                    Icons.people,
-                    Colors.blue,
-                  ),
-                  _buildStatCard(
-                    'Active Users',
-                    _statistics['active'].toString(),
-                    Icons.check_circle,
-                    Colors.green,
-                  ),
-                  _buildStatCard(
-                    'Admins',
-                    _statistics['admins'].toString(),
-                    Icons.admin_panel_settings,
-                    Colors.purple,
-                  ),
-                  _buildStatCard(
-                    'Staff',
-                    _statistics['staff'].toString(),
-                    Icons.badge,
-                    Colors.orange,
-                  ),
-                ],
+              statisticsAsync.when(
+                data: (stats) => GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.6,
+                  children: [
+                    _buildStatCard(
+                      'Total Users',
+                      stats['total'].toString(),
+                      Icons.people,
+                      Colors.blue,
+                    ),
+                    _buildStatCard(
+                      'Active Users',
+                      stats['active'].toString(),
+                      Icons.check_circle,
+                      Colors.green,
+                    ),
+                    _buildStatCard(
+                      'Admins',
+                      stats['admins'].toString(),
+                      Icons.admin_panel_settings,
+                      Colors.purple,
+                    ),
+                    _buildStatCard(
+                      'Staff',
+                      stats['staff'].toString(),
+                      Icons.badge,
+                      Colors.orange,
+                    ),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Center(child: Text('Error loading statistics')),
               ),
               const SizedBox(height: 24),
 
@@ -209,7 +190,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     MaterialPageRoute(
                       builder: (context) => const UserManagementScreen(),
                     ),
-                  ).then((_) => _loadStatistics());
+                  ).then((_) {
+                    ref.invalidate(userStatisticsProvider);
+                  });
                 },
               ),
               const SizedBox(height: 12),
@@ -426,7 +409,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       const Center(child: CircularProgressIndicator()),
                 );
 
-                await _authService.createUser(
+                final authService = ref.read(authServiceProvider);
+                await authService.createUser(
                   email: emailController.text.trim(),
                   password: passwordController.text,
                   fullName: nameController.text.trim(),

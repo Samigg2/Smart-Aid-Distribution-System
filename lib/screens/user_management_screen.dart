@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../services/firestore_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/firestore_provider.dart';
 import '../models/user_model.dart';
 import 'package:intl/intl.dart';
 
-class UserManagementScreen extends StatefulWidget {
+class UserManagementScreen extends ConsumerStatefulWidget {
   const UserManagementScreen({super.key});
 
   @override
-  State<UserManagementScreen> createState() => _UserManagementScreenState();
+  ConsumerState<UserManagementScreen> createState() => _UserManagementScreenState();
 }
 
-class _UserManagementScreenState extends State<UserManagementScreen> {
-  final _firestoreService = FirestoreService();
+class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
   String _searchQuery = '';
 
   @override
@@ -49,61 +49,79 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
           // Users List
           Expanded(
-            child: StreamBuilder<List<UserModel>>(
-              stream: _firestoreService.getAllUsers(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            child: Consumer(
+              builder: (context, ref, child) {
+                final usersAsync = ref.watch(allUsersProvider);
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error loading users',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                return usersAsync.when(
+                  data: (users) {
+                    if (users.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.people_outline, size: 60, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No users found',
+                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                }
+                      );
+                    }
 
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.people_outline, size: 60, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No users found',
-                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                    // Filter users based on search query
+                    List<UserModel> filteredUsers = users;
+                    if (_searchQuery.isNotEmpty) {
+                      filteredUsers = users.where((user) {
+                        return user.fullName.toLowerCase().contains(_searchQuery) ||
+                            user.email.toLowerCase().contains(_searchQuery) ||
+                            user.phone.contains(_searchQuery);
+                      }).toList();
+                    }
 
-                List<UserModel> users = snapshot.data!;
-
-                // Filter users based on search query
-                if (_searchQuery.isNotEmpty) {
-                  users = users.where((user) {
-                    return user.fullName.toLowerCase().contains(_searchQuery) ||
-                        user.email.toLowerCase().contains(_searchQuery) ||
-                        user.phone.contains(_searchQuery);
-                  }).toList();
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    return _buildUserCard(users[index]);
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: filteredUsers.length,
+                      itemBuilder: (context, index) {
+                        return _buildUserCard(filteredUsers[index]);
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) {
+                    print('Error loading users: $error');
+                    print('Stack trace: $stack');
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error loading users',
+                            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                            child: Text(
+                              error.toString(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              ref.invalidate(allUsersProvider);
+                            },
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                 );
               },
@@ -342,7 +360,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             onPressed: () async {
               if (formKey.currentState!.validate()) {
                 Navigator.pop(context);
-                await _firestoreService.updateUser(user.uid, {
+                final firestoreService = ref.read(firestoreServiceProvider);
+                await firestoreService.updateUser(user.uid, {
                   'fullName': nameController.text.trim(),
                   'phone': phoneController.text.trim(),
                   'role': selectedRole,
@@ -384,7 +403,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
 
     if (confirm == true) {
-      await _firestoreService.toggleUserStatus(user.uid, user.isActive);
+      final firestoreService = ref.read(firestoreServiceProvider);
+      await firestoreService.toggleUserStatus(user.uid, user.isActive);
     }
   }
 }
