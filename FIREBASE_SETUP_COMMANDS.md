@@ -12,7 +12,6 @@ npm install -g firebase-tools
 # Install FlutterFire CLI
 dart pub global activate flutterfire_cli
 ```
-2,3,4,5 i have done the part one and two does this have a problem
 ### Step 2: Login to Firebase
 ```bash
 firebase login
