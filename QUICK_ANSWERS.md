@@ -52,3 +52,4 @@ Then create `flutter_launcher_icons.yaml` and run `flutter pub run flutter_launc
 
 **Total: ~2 hours**
 
+
