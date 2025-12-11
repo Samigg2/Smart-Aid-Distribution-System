@@ -5,6 +5,8 @@ import '../providers/firestore_provider.dart';
 import 'login_screen.dart';
 import 'user_management_screen.dart';
 import 'beneficiary_list_screen.dart';
+import 'distribution/distribution_programs_screen.dart';
+import 'reports/reports_dashboard_screen.dart';
 
 class AdminDashboard extends ConsumerStatefulWidget {
   const AdminDashboard({super.key});
@@ -213,10 +215,40 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
               ),
               const SizedBox(height: 12),
               _buildActionButton(
+                'Distribution Programs',
+                'Create and manage aid distribution programs',
+                Icons.inventory,
+                Colors.green,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DistributionProgramsScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildActionButton(
+                'Reports & Analytics',
+                'View statistics and export data',
+                Icons.analytics,
+                Colors.indigo,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ReportsDashboardScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildActionButton(
                 'Create New Staff',
                 'Add a new staff member to the system',
                 Icons.person_add,
-                Colors.green,
+                Colors.orange,
                 () {
                   _showCreateUserDialog(context);
                 },

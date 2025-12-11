@@ -1,0 +1,227 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+import '../models/beneficiary_model.dart';
+import '../models/distribution_model.dart';
+
+class ExportService {
+  /// Export beneficiaries to CSV file
+  Future<String?> exportBeneficiariesToCsv(List<BeneficiaryModel> beneficiaries) async {
+    try {
+      // Build CSV content
+      final buffer = StringBuffer();
+
+      // Header row
+      buffer.writeln([
+        'Beneficiary ID',
+        'Full Name',
+        'National ID',
+        'Phone Number',
+        'Age',
+        'Gender',
+        'Categories',
+        'Is Pregnant',
+        'Pregnancy Trimester',
+        'Children Under 5',
+        'Children Ages',
+        'Family Size',
+        'Female-Headed Household',
+        'Income Level',
+        'Receiving Other Aid',
+        'Region',
+        'Zone',
+        'Woreda',
+        'Latitude',
+        'Longitude',
+        'Urgency Score',
+        'Registered At',
+        'Registered By',
+      ].map(_escapeCsv).join(','));
+
+      // Data rows
+      for (var b in beneficiaries) {
+        buffer.writeln([
+          b.beneficiaryId,
+          b.fullName,
+          b.nationalId,
+          b.phoneNumber ?? '',
+          b.age?.toString() ?? '',
+          b.gender,
+          b.vulnerableCategories.join('; '),
+          b.isPregnant ? 'Yes' : 'No',
+          b.pregnancyTrimester?.toString() ?? '',
+          b.childrenUnder5Count.toString(),
+          b.childrenAges.map((a) => '$a months').join('; '),
+          b.totalFamilySize.toString(),
+          b.isFemaleHeadedHousehold ? 'Yes' : 'No',
+          b.incomeLevel,
+          b.currentlyReceivingOtherAid ? 'Yes' : 'No',
+          b.region,
+          b.zone ?? '',
+          b.woreda ?? '',
+          b.latitude?.toString() ?? '',
+          b.longitude?.toString() ?? '',
+          b.urgencyScore.toStringAsFixed(2),
+          DateFormat('yyyy-MM-dd HH:mm').format(b.createdAt),
+          b.registeredBy,
+        ].map(_escapeCsv).join(','));
+      }
+
+      // Save to file
+      final filePath = await _saveToFile(
+        'beneficiaries_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv',
+        buffer.toString(),
+      );
+
+      return filePath;
+    } catch (e) {
+      print('Error exporting beneficiaries: $e');
+      return null;
+    }
+  }
+
+  /// Export distributions to CSV file
+  Future<String?> exportDistributionsToCsv(List<DistributionRecord> distributions) async {
+    try {
+      // Build CSV content
+      final buffer = StringBuffer();
+
+      // Header row
+      buffer.writeln([
+        'Record ID',
+        'Program ID',
+        'Program Name',
+        'Beneficiary ID',
+        'Beneficiary Name',
+        'Beneficiary National ID',
+        'Aid Type',
+        'Quantity',
+        'Unit',
+        'Distributed By',
+        'Distributed By Name',
+        'Distributed At',
+        'Latitude',
+        'Longitude',
+        'Notes',
+      ].map(_escapeCsv).join(','));
+
+      // Data rows
+      for (var d in distributions) {
+        buffer.writeln([
+          d.recordId,
+          d.programId,
+          d.programName,
+          d.beneficiaryId,
+          d.beneficiaryName,
+          d.beneficiaryNationalId,
+          d.aidType,
+          d.quantity.toString(),
+          d.unit,
+          d.distributedBy,
+          d.distributedByName ?? '',
+          DateFormat('yyyy-MM-dd HH:mm').format(d.distributedAt),
+          d.latitude?.toString() ?? '',
+          d.longitude?.toString() ?? '',
+          d.notes ?? '',
+        ].map(_escapeCsv).join(','));
+      }
+
+      // Save to file
+      final filePath = await _saveToFile(
+        'distributions_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv',
+        buffer.toString(),
+      );
+
+      return filePath;
+    } catch (e) {
+      print('Error exporting distributions: $e');
+      return null;
+    }
+  }
+
+  /// Export program summary
+  Future<String?> exportProgramSummary(
+    DistributionProgram program,
+    List<DistributionRecord> distributions,
+  ) async {
+    try {
+      final buffer = StringBuffer();
+
+      // Program info
+      buffer.writeln('PROGRAM SUMMARY');
+      buffer.writeln('');
+      buffer.writeln('Program Name,${_escapeCsv(program.programName)}');
+      buffer.writeln('Aid Type,${_escapeCsv(AidType.fromValue(program.aidType).label)}');
+      buffer.writeln('Status,${_escapeCsv(program.status)}');
+      buffer.writeln('Target Categories,${_escapeCsv(program.targetCategories.join("; "))}');
+      buffer.writeln('Quantity Per Person,${program.quantityPerBeneficiary} ${program.unit}');
+      buffer.writeln('Total Distributed,${program.distributedCount}');
+      buffer.writeln('Start Date,${DateFormat('yyyy-MM-dd').format(program.startDate)}');
+      if (program.endDate != null) {
+        buffer.writeln('End Date,${DateFormat('yyyy-MM-dd').format(program.endDate!)}');
+      }
+      buffer.writeln('');
+      buffer.writeln('');
+
+      // Distribution details
+      buffer.writeln('DISTRIBUTION RECORDS');
+      buffer.writeln('');
+      buffer.writeln([
+        'Beneficiary Name',
+        'National ID',
+        'Quantity',
+        'Unit',
+        'Date',
+        'Distributed By',
+        'Location',
+      ].map(_escapeCsv).join(','));
+
+      for (var d in distributions) {
+        buffer.writeln([
+          d.beneficiaryName,
+          d.beneficiaryNationalId,
+          d.quantity.toString(),
+          d.unit,
+          DateFormat('yyyy-MM-dd HH:mm').format(d.distributedAt),
+          d.distributedByName ?? d.distributedBy,
+          d.latitude != null ? '${d.latitude}, ${d.longitude}' : '',
+        ].map(_escapeCsv).join(','));
+      }
+
+      // Save to file
+      final filePath = await _saveToFile(
+        'program_${program.programId}_${DateFormat('yyyyMMdd').format(DateTime.now())}.csv',
+        buffer.toString(),
+      );
+
+      return filePath;
+    } catch (e) {
+      print('Error exporting program summary: $e');
+      return null;
+    }
+  }
+
+  /// Escape CSV value
+  String _escapeCsv(String value) {
+    if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+      return '"${value.replaceAll('"', '""')}"';
+    }
+    return value;
+  }
+
+  /// Save content to file and return path
+  Future<String> _saveToFile(String fileName, String content) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final exportDir = Directory('${directory.path}/exports');
+
+    if (!await exportDir.exists()) {
+      await exportDir.create(recursive: true);
+    }
+
+    final file = File('${exportDir.path}/$fileName');
+    await file.writeAsString(content);
+
+    return file.path;
+  }
+}
+

@@ -173,6 +173,22 @@ class BeneficiaryService {
     }
   }
 
+  // Get all beneficiaries for export (one-time fetch)
+  Future<List<BeneficiaryModel>> getAllBeneficiariesForExport() async {
+    try {
+      final snapshot = await _firestore
+          .collection('beneficiaries')
+          .orderBy('createdAt', descending: true)
+          .get();
+      return snapshot.docs
+          .map((doc) => BeneficiaryModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting beneficiaries for export: $e');
+      return [];
+    }
+  }
+
   // Get beneficiary statistics
   Future<Map<String, int>> getBeneficiaryStatistics() async {
     try {

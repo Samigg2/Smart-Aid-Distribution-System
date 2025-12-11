@@ -1,16 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum BeneficiaryType {
+/// Vulnerable group categories - a beneficiary can belong to multiple
+enum VulnerableCategory {
   pregnantWoman('pregnant_woman', 'Pregnant Woman'),
   lactatingMother('lactating_mother', 'Lactating Mother'),
-  singleMother('single_mother', 'Single Mother'),
-  childOnly('child_only', 'Child Only');
+  childUnder5('child_under_5', 'Child Under 5'),
+  elderly('elderly', 'Elderly (60+)'),
+  disabled('disabled', 'Person with Disability'),
+  chronicallyIll('chronically_ill', 'Chronically Ill');
 
   final String value;
   final String label;
-  const BeneficiaryType(this.value, this.label);
+  const VulnerableCategory(this.value, this.label);
+
+  static VulnerableCategory fromValue(String value) {
+    return VulnerableCategory.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => VulnerableCategory.pregnantWoman,
+    );
+  }
 }
 
+/// Income level enum
 enum IncomeLevel {
   lessThan1000('less_than_1000', 'Less than 1,000 ETB'),
   between1000_3000('1000-3000', '1,000 - 3,000 ETB'),
@@ -20,34 +31,148 @@ enum IncomeLevel {
   final String value;
   final String label;
   const IncomeLevel(this.value, this.label);
+
+  static IncomeLevel fromValue(String value) {
+    return IncomeLevel.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => IncomeLevel.lessThan1000,
+    );
+  }
+}
+
+/// Mobility level for elderly
+enum MobilityLevel {
+  canWalk('can_walk', 'Can Walk Independently'),
+  usesAid('uses_aid', 'Uses Walking Aid'),
+  bedridden('bedridden', 'Bedridden');
+
+  final String value;
+  final String label;
+  const MobilityLevel(this.value, this.label);
+
+  static MobilityLevel fromValue(String value) {
+    return MobilityLevel.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => MobilityLevel.canWalk,
+    );
+  }
+}
+
+/// Disability type
+enum DisabilityType {
+  physical('physical', 'Physical'),
+  visual('visual', 'Visual'),
+  hearing('hearing', 'Hearing'),
+  intellectual('intellectual', 'Intellectual'),
+  multiple('multiple', 'Multiple Disabilities');
+
+  final String value;
+  final String label;
+  const DisabilityType(this.value, this.label);
+
+  static DisabilityType fromValue(String value) {
+    return DisabilityType.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => DisabilityType.physical,
+    );
+  }
+}
+
+/// Disability severity
+enum DisabilitySeverity {
+  mild('mild', 'Mild'),
+  moderate('moderate', 'Moderate'),
+  severe('severe', 'Severe');
+
+  final String value;
+  final String label;
+  const DisabilitySeverity(this.value, this.label);
+
+  static DisabilitySeverity fromValue(String value) {
+    return DisabilitySeverity.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => DisabilitySeverity.moderate,
+    );
+  }
+}
+
+/// Chronic illness type
+enum ChronicIllnessType {
+  hivAids('hiv_aids', 'HIV/AIDS'),
+  tuberculosis('tuberculosis', 'Tuberculosis'),
+  diabetes('diabetes', 'Diabetes'),
+  heartDisease('heart_disease', 'Heart Disease'),
+  cancer('cancer', 'Cancer'),
+  kidneyDisease('kidney_disease', 'Kidney Disease'),
+  other('other', 'Other Chronic Illness');
+
+  final String value;
+  final String label;
+  const ChronicIllnessType(this.value, this.label);
+
+  static ChronicIllnessType fromValue(String value) {
+    return ChronicIllnessType.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => ChronicIllnessType.other,
+    );
+  }
 }
 
 class BeneficiaryModel {
   final String beneficiaryId;
   final String fullName;
-  final String nationalId; // TEXT ONLY, no photo
+  final String nationalId;
   final String? phoneNumber;
   final int? age;
-  final String gender; // Usually "female" for mothers
-  final String beneficiaryType;
+  final String gender;
+
+  // Multi-select vulnerable categories
+  final List<String> vulnerableCategories;
+
+  // Mother & Child specific fields (kept for compatibility)
+  final String? beneficiaryType; // Legacy field
   final bool isPregnant;
-  final int? pregnancyTrimester; // 1, 2, or 3
+  final int? pregnancyTrimester;
   final int childrenUnder5Count;
-  final List<int> childrenAges; // in months
+  final List<int> childrenAges;
+
+  // Elderly specific fields (60+)
+  final bool isLivingAlone;
+  final bool hasCaregiver;
+  final String? mobilityLevel;
+
+  // Disability specific fields
+  final String? disabilityType;
+  final String? disabilitySeverity;
+  final bool usesAssistiveDevice;
+  final bool needsPersonalAssistance;
+
+  // Chronic illness specific fields
+  final String? chronicIllnessType;
+  final bool isOnMedication;
+  final bool needsRegularMedicalCare;
+
+  // Family & Vulnerability
   final int totalFamilySize;
   final bool isFemaleHeadedHousehold;
   final String incomeLevel;
   final bool currentlyReceivingOtherAid;
+
+  // Location
   final String region;
   final String? zone;
   final String? woreda;
   final double? latitude;
   final double? longitude;
-  final String photoUrl; // Cloudinary URL
-  final String registeredBy; // Staff UID
+
+  // Photo (OPTIONAL now)
+  final String? photoUrl;
+
+  // Metadata
+  final String registeredBy;
   final DateTime createdAt;
   final DateTime? updatedAt;
-  final double urgencyScore; // Calculated based on vulnerability
+  final double urgencyScore;
 
   BeneficiaryModel({
     required this.beneficiaryId,
@@ -56,11 +181,22 @@ class BeneficiaryModel {
     this.phoneNumber,
     this.age,
     required this.gender,
-    required this.beneficiaryType,
+    required this.vulnerableCategories,
+    this.beneficiaryType,
     required this.isPregnant,
     this.pregnancyTrimester,
     required this.childrenUnder5Count,
     required this.childrenAges,
+    this.isLivingAlone = false,
+    this.hasCaregiver = false,
+    this.mobilityLevel,
+    this.disabilityType,
+    this.disabilitySeverity,
+    this.usesAssistiveDevice = false,
+    this.needsPersonalAssistance = false,
+    this.chronicIllnessType,
+    this.isOnMedication = false,
+    this.needsRegularMedicalCare = false,
     required this.totalFamilySize,
     required this.isFemaleHeadedHousehold,
     required this.incomeLevel,
@@ -70,7 +206,7 @@ class BeneficiaryModel {
     this.woreda,
     this.latitude,
     this.longitude,
-    required this.photoUrl,
+    this.photoUrl,
     required this.registeredBy,
     required this.createdAt,
     this.updatedAt,
@@ -83,9 +219,31 @@ class BeneficiaryModel {
     return childrenAges.reduce((a, b) => a < b ? a : b);
   }
 
+  // Check if belongs to a category
+  bool hasCategory(VulnerableCategory category) {
+    return vulnerableCategories.contains(category.value);
+  }
+
+  // Get categories as enum list
+  List<VulnerableCategory> get categoriesAsEnum {
+    return vulnerableCategories
+        .map((v) => VulnerableCategory.fromValue(v))
+        .toList();
+  }
+
   // Factory constructor from Firestore
   factory BeneficiaryModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    // Handle legacy beneficiaryType field
+    List<String> categories = [];
+    if (data['vulnerableCategories'] != null) {
+      categories = List<String>.from(data['vulnerableCategories']);
+    } else if (data['beneficiaryType'] != null) {
+      // Convert legacy field to new format
+      categories = [data['beneficiaryType']];
+    }
+
     return BeneficiaryModel(
       beneficiaryId: doc.id,
       fullName: data['fullName'] ?? '',
@@ -93,23 +251,36 @@ class BeneficiaryModel {
       phoneNumber: data['phoneNumber'],
       age: data['age'],
       gender: data['gender'] ?? 'female',
-      beneficiaryType: data['beneficiaryType'] ?? '',
+      vulnerableCategories: categories,
+      beneficiaryType: data['beneficiaryType'],
       isPregnant: data['isPregnant'] ?? false,
       pregnancyTrimester: data['pregnancyTrimester'],
       childrenUnder5Count: data['childrenUnder5Count'] ?? 0,
       childrenAges: List<int>.from(data['childrenAges'] ?? []),
+      isLivingAlone: data['isLivingAlone'] ?? false,
+      hasCaregiver: data['hasCaregiver'] ?? false,
+      mobilityLevel: data['mobilityLevel'],
+      disabilityType: data['disabilityType'],
+      disabilitySeverity: data['disabilitySeverity'],
+      usesAssistiveDevice: data['usesAssistiveDevice'] ?? false,
+      needsPersonalAssistance: data['needsPersonalAssistance'] ?? false,
+      chronicIllnessType: data['chronicIllnessType'],
+      isOnMedication: data['isOnMedication'] ?? false,
+      needsRegularMedicalCare: data['needsRegularMedicalCare'] ?? false,
       totalFamilySize: data['totalFamilySize'] ?? 1,
       isFemaleHeadedHousehold: data['isFemaleHeadedHousehold'] ?? false,
-      incomeLevel: data['incomeLevel'] ?? '',
+      incomeLevel: data['incomeLevel'] ?? 'less_than_1000',
       currentlyReceivingOtherAid: data['currentlyReceivingOtherAid'] ?? false,
       region: data['region'] ?? '',
       zone: data['zone'],
       woreda: data['woreda'],
       latitude: data['latitude']?.toDouble(),
       longitude: data['longitude']?.toDouble(),
-      photoUrl: data['photoUrl'] ?? '',
+      photoUrl: data['photoUrl'],
       registeredBy: data['registeredBy'] ?? '',
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
       updatedAt: data['updatedAt'] != null
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
@@ -125,11 +296,22 @@ class BeneficiaryModel {
       'phoneNumber': phoneNumber,
       'age': age,
       'gender': gender,
+      'vulnerableCategories': vulnerableCategories,
       'beneficiaryType': beneficiaryType,
       'isPregnant': isPregnant,
       'pregnancyTrimester': pregnancyTrimester,
       'childrenUnder5Count': childrenUnder5Count,
       'childrenAges': childrenAges,
+      'isLivingAlone': isLivingAlone,
+      'hasCaregiver': hasCaregiver,
+      'mobilityLevel': mobilityLevel,
+      'disabilityType': disabilityType,
+      'disabilitySeverity': disabilitySeverity,
+      'usesAssistiveDevice': usesAssistiveDevice,
+      'needsPersonalAssistance': needsPersonalAssistance,
+      'chronicIllnessType': chronicIllnessType,
+      'isOnMedication': isOnMedication,
+      'needsRegularMedicalCare': needsRegularMedicalCare,
       'totalFamilySize': totalFamilySize,
       'isFemaleHeadedHousehold': isFemaleHeadedHousehold,
       'incomeLevel': incomeLevel,
@@ -147,8 +329,9 @@ class BeneficiaryModel {
     };
   }
 
-  // Calculate urgency score based on vulnerability factors
+  /// Calculate urgency score based on ALL vulnerability factors
   static double calculateUrgencyScore({
+    required List<String> vulnerableCategories,
     required bool isPregnant,
     int? pregnancyTrimester,
     required int childrenUnder5Count,
@@ -156,37 +339,78 @@ class BeneficiaryModel {
     required bool isFemaleHeadedHousehold,
     required String incomeLevel,
     required bool currentlyReceivingOtherAid,
+    // Elderly
+    bool isLivingAlone = false,
+    String? mobilityLevel,
+    // Disabled
+    String? disabilitySeverity,
+    bool needsPersonalAssistance = false,
+    // Chronically ill
+    bool needsRegularMedicalCare = false,
   }) {
     double score = 0.0;
 
-    // Pregnancy adds urgency
-    if (isPregnant) {
-      score += 0.3;
-      // Later trimesters are more urgent
-      if (pregnancyTrimester == 3) score += 0.2;
-      if (pregnancyTrimester == 2) score += 0.1;
+    // === CATEGORY-BASED SCORING ===
+
+    // Pregnant Woman: +0.25, +0.1 for 3rd trimester
+    if (vulnerableCategories.contains('pregnant_woman') || isPregnant) {
+      score += 0.25;
+      if (pregnancyTrimester == 3) score += 0.1;
+      if (pregnancyTrimester == 2) score += 0.05;
     }
 
-    // More children under 5 = higher urgency
-    score += (childrenUnder5Count * 0.1).clamp(0.0, 0.3);
-
-    // Very young children (under 12 months) add urgency
-    if (childrenAges.any((age) => age < 12)) {
-      score += 0.2;
+    // Lactating Mother: +0.15
+    if (vulnerableCategories.contains('lactating_mother')) {
+      score += 0.15;
     }
 
-    // Female-headed household adds vulnerability
+    // Child Under 5: +0.20, +0.1 if under 12 months
+    if (vulnerableCategories.contains('child_under_5') ||
+        childrenUnder5Count > 0) {
+      score += 0.20;
+      if (childrenAges.any((age) => age < 12)) {
+        score += 0.1; // Very young child
+      }
+      // More children = higher urgency
+      score += (childrenUnder5Count * 0.05).clamp(0.0, 0.15);
+    }
+
+    // Elderly (60+): +0.20, +0.1 if living alone, +0.1 if bedridden
+    if (vulnerableCategories.contains('elderly')) {
+      score += 0.20;
+      if (isLivingAlone) score += 0.1;
+      if (mobilityLevel == 'bedridden') score += 0.1;
+      if (mobilityLevel == 'uses_aid') score += 0.05;
+    }
+
+    // Disabled: +0.20, +0.15 if severe, +0.1 if needs assistance
+    if (vulnerableCategories.contains('disabled')) {
+      score += 0.20;
+      if (disabilitySeverity == 'severe') score += 0.15;
+      if (disabilitySeverity == 'moderate') score += 0.08;
+      if (needsPersonalAssistance) score += 0.1;
+    }
+
+    // Chronically Ill: +0.15, +0.1 if needs regular medical care
+    if (vulnerableCategories.contains('chronically_ill')) {
+      score += 0.15;
+      if (needsRegularMedicalCare) score += 0.1;
+    }
+
+    // === ADDITIONAL FACTORS ===
+
+    // Female-headed household: +0.15
     if (isFemaleHeadedHousehold) {
       score += 0.15;
     }
 
-    // Lower income = higher urgency
+    // Income level
     switch (incomeLevel) {
       case 'less_than_1000':
-        score += 0.2;
+        score += 0.20;
         break;
       case '1000-3000':
-        score += 0.1;
+        score += 0.10;
         break;
       case '3000-5000':
         score += 0.05;
@@ -209,11 +433,22 @@ class BeneficiaryModel {
     String? phoneNumber,
     int? age,
     String? gender,
+    List<String>? vulnerableCategories,
     String? beneficiaryType,
     bool? isPregnant,
     int? pregnancyTrimester,
     int? childrenUnder5Count,
     List<int>? childrenAges,
+    bool? isLivingAlone,
+    bool? hasCaregiver,
+    String? mobilityLevel,
+    String? disabilityType,
+    String? disabilitySeverity,
+    bool? usesAssistiveDevice,
+    bool? needsPersonalAssistance,
+    String? chronicIllnessType,
+    bool? isOnMedication,
+    bool? needsRegularMedicalCare,
     int? totalFamilySize,
     bool? isFemaleHeadedHousehold,
     String? incomeLevel,
@@ -236,11 +471,24 @@ class BeneficiaryModel {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       age: age ?? this.age,
       gender: gender ?? this.gender,
+      vulnerableCategories: vulnerableCategories ?? this.vulnerableCategories,
       beneficiaryType: beneficiaryType ?? this.beneficiaryType,
       isPregnant: isPregnant ?? this.isPregnant,
       pregnancyTrimester: pregnancyTrimester ?? this.pregnancyTrimester,
       childrenUnder5Count: childrenUnder5Count ?? this.childrenUnder5Count,
       childrenAges: childrenAges ?? this.childrenAges,
+      isLivingAlone: isLivingAlone ?? this.isLivingAlone,
+      hasCaregiver: hasCaregiver ?? this.hasCaregiver,
+      mobilityLevel: mobilityLevel ?? this.mobilityLevel,
+      disabilityType: disabilityType ?? this.disabilityType,
+      disabilitySeverity: disabilitySeverity ?? this.disabilitySeverity,
+      usesAssistiveDevice: usesAssistiveDevice ?? this.usesAssistiveDevice,
+      needsPersonalAssistance:
+          needsPersonalAssistance ?? this.needsPersonalAssistance,
+      chronicIllnessType: chronicIllnessType ?? this.chronicIllnessType,
+      isOnMedication: isOnMedication ?? this.isOnMedication,
+      needsRegularMedicalCare:
+          needsRegularMedicalCare ?? this.needsRegularMedicalCare,
       totalFamilySize: totalFamilySize ?? this.totalFamilySize,
       isFemaleHeadedHousehold:
           isFemaleHeadedHousehold ?? this.isFemaleHeadedHousehold,
@@ -260,6 +508,3 @@ class BeneficiaryModel {
     );
   }
 }
-
-
-

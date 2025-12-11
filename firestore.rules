@@ -88,6 +88,45 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
+    // Distribution Programs collection
+    match /distribution_programs/{programId} {
+      // All authenticated active users can read programs
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && isActive())
+      );
+      
+      // Only admins can create programs
+      allow create: if isAdmin();
+      
+      // Only admins can update programs
+      allow update: if isAdmin();
+      
+      // Only admins can delete programs
+      allow delete: if isAdmin();
+    }
+    
+    // Distribution Records collection
+    match /distribution_records/{recordId} {
+      // All authenticated active users can read distribution records
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && isActive())
+      );
+      
+      // Active staff and admins can create distribution records
+      allow create: if isAuthenticated() && (
+        isAdmin() || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && isActive())
+      );
+      
+      // Only admins can update distribution records
+      allow update: if isAdmin();
+      
+      // Only admins can delete distribution records
+      allow delete: if isAdmin();
+    }
+    
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

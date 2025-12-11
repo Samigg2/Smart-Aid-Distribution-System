@@ -130,7 +130,7 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
                             value: null,
                             child: Text('All Types'),
                           ),
-                          ...BeneficiaryType.values.map((type) {
+                          ...VulnerableCategory.values.map((type) {
                             return DropdownMenuItem(
                               value: type.value,
                               child: Text(type.label),
@@ -166,7 +166,7 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
                 }
                 if (_filterType != null) {
                   filtered = filtered
-                      .where((b) => b.beneficiaryType == _filterType)
+                      .where((b) => b.vulnerableCategories.contains(_filterType))
                       .toList();
                 }
 
@@ -296,9 +296,9 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
               // Photo
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: beneficiary.photoUrl.isNotEmpty
+                child: beneficiary.photoUrl != null && beneficiary.photoUrl!.isNotEmpty
                     ? Image.network(
-                        beneficiary.photoUrl,
+                        beneficiary.photoUrl!,
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
