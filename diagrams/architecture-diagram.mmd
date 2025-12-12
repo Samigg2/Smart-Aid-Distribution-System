@@ -1,0 +1,25 @@
+graph TB
+    subgraph "Mobile App (Flutter)"
+        A[Presentation Layer<br/>Screens & Widgets]
+        B[State Management<br/>Riverpod Providers]
+        C[Business Logic<br/>Services]
+    end
+    
+    subgraph "Backend Services"
+        D[Firebase Authentication]
+        E[Firestore Database]
+        F[Cloudinary Storage]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    C --> E
+    C --> F
+    
+    style A fill:#E3F2FD
+    style B fill:#F3E5F5
+    style C fill:#E8F5E9
+    style D fill:#FFF3E0
+    style E fill:#FFF3E0
+    style F fill:#FFF3E0

@@ -1,0 +1,160 @@
+classDiagram
+    class UserModel {
+        +String uid
+        +String email
+        +String fullName
+        +String phone
+        +String role
+        +bool isActive
+        +DateTime createdAt
+        +fromFirestore(DocumentSnapshot)
+        +toMap()
+    }
+    
+    class BeneficiaryModel {
+        +String beneficiaryId
+        +String fullName
+        +String nationalId
+        +String? phoneNumber
+        +int? age
+        +String gender
+        +List~String~ vulnerableCategories
+        +bool isPregnant
+        +int? pregnancyTrimester
+        +int childrenUnder5Count
+        +List~int~ childrenAges
+        +int totalFamilySize
+        +bool isFemaleHeadedHousehold
+        +String incomeLevel
+        +bool currentlyReceivingOtherAid
+        +String region
+        +String? zone
+        +String? woreda
+        +double? latitude
+        +double? longitude
+        +String? photoUrl
+        +double urgencyScore
+        +String registeredBy
+        +DateTime createdAt
+        +DateTime? updatedAt
+        +fromFirestore(DocumentSnapshot)
+        +toMap()
+        +calculateUrgencyScore()$ double
+        +hasCategory(VulnerableCategory) bool
+    }
+    
+    class DistributionProgram {
+        +String programId
+        +String programName
+        +String? description
+        +String aidType
+        +List~String~ targetCategories
+        +double quantityPerBeneficiary
+        +String unit
+        +double? totalBudget
+        +int? maxBeneficiaries
+        +DateTime startDate
+        +DateTime? endDate
+        +String status
+        +String? region
+        +String createdBy
+        +int distributedCount
+        +double distributedQuantity
+        +DateTime createdAt
+        +DateTime? updatedAt
+        +fromFirestore(DocumentSnapshot)
+        +toMap()
+        +isActive bool
+    }
+    
+    class DistributionRecord {
+        +String recordId
+        +String programId
+        +String programName
+        +String beneficiaryId
+        +String beneficiaryName
+        +String beneficiaryNationalId
+        +String aidType
+        +double quantity
+        +String unit
+        +String distributedBy
+        +String? distributedByName
+        +DateTime distributedAt
+        +double? latitude
+        +double? longitude
+        +String? notes
+        +fromFirestore(DocumentSnapshot)
+        +toMap()
+    }
+    
+    class AuthService {
+        -FirebaseAuth _auth
+        -FirebaseFirestore _firestore
+        +signInWithEmailPassword(String, String) Future~UserModel?~
+        +signOut() Future~void~
+        +createUser(...) Future~UserModel?~
+        +getCurrentUserData() Future~UserModel?~
+        +authStateChanges Stream~User?~
+    }
+    
+    class BeneficiaryService {
+        -FirebaseFirestore _firestore
+        +createBeneficiary(BeneficiaryModel) Future~String?~
+        +getAllBeneficiaries() Stream~List~BeneficiaryModel~~
+        +getBeneficiariesByStaff(String) Stream~List~BeneficiaryModel~~
+        +getBeneficiaryById(String) Future~BeneficiaryModel?~
+        +searchBeneficiaries(String) Future~List~BeneficiaryModel~~
+        +updateBeneficiary(String, BeneficiaryModel) Future~bool~
+        +deleteBeneficiary(String) Future~bool~
+        +getBeneficiaryStatistics() Future~Map~String,int~~
+    }
+    
+    class DistributionService {
+        -FirebaseFirestore _firestore
+        +createProgram(DistributionProgram) Future~String?~
+        +getAllPrograms() Stream~List~DistributionProgram~~
+        +getActivePrograms() Stream~List~DistributionProgram~~
+        +getProgramById(String) Future~DistributionProgram?~
+        +updateProgramStatus(String, String) Future~bool~
+        +getEligibleBeneficiaries(DistributionProgram) Future~List~BeneficiaryModel~~
+        +hasAlreadyReceived(String, String) Future~bool~
+        +recordDistribution(DistributionRecord) Future~String?~
+        +getDistributionsByProgram(String) Stream~List~DistributionRecord~~
+        +getDistributionsByBeneficiary(String) Stream~List~DistributionRecord~~
+        +getDistributionStatistics() Future~Map~String,dynamic~~
+    }
+    
+    class CloudinaryService {
+        -String _cloudName
+        -String _apiKey
+        -String _apiSecret
+        +uploadBeneficiaryPhoto(File) Future~String~
+        -_compressImage(File) Future~File~
+        +getOptimizedUrl(String, int) String
+    }
+    
+    class ExportService {
+        +exportBeneficiariesToCsv(List~BeneficiaryModel~) Future~String?~
+        +exportDistributionsToCsv(List~DistributionRecord~) Future~String?~
+        +exportProgramSummary(...) Future~String?~
+    }
+    
+    class FirestoreService {
+        -FirebaseFirestore _firestore
+        +getAllUsers() Stream~List~UserModel~~
+        +getUserById(String) Future~UserModel?~
+        +updateUser(String, Map) Future~bool~
+        +toggleUserStatus(String) Future~bool~
+        +deleteUser(String) Future~bool~
+        +getUserStatistics() Future~Map~String,int~~
+    }
+    
+    AuthService --> UserModel : creates/returns
+    BeneficiaryService --> BeneficiaryModel : manages
+    DistributionService --> DistributionProgram : manages
+    DistributionService --> DistributionRecord : manages
+    DistributionService --> BeneficiaryModel : queries
+    CloudinaryService --> BeneficiaryModel : uploads photos for
+    ExportService --> BeneficiaryModel : exports
+    ExportService --> DistributionRecord : exports
+    FirestoreService --> UserModel : manages

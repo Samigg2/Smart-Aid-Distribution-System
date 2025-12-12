@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant Staff
+    participant ProgramDetailScreen
+    participant DistributeAidScreen
+    participant DistributionService
+    participant Firestore
+    participant ProgramService
+    
+    Staff->>ProgramDetailScreen: Click "Distribute" Button
+    ProgramDetailScreen->>DistributeAidScreen: Navigate with Beneficiary & Program
+    DistributeAidScreen->>DistributionService: hasAlreadyReceived()
+    DistributionService->>Firestore: Query distribution_records<br/>WHERE programId=X AND beneficiaryId=Y
+    Firestore-->>DistributionService: Return Result
+    alt Already Received
+        DistributionService-->>DistributeAidScreen: true
+        DistributeAidScreen-->>Staff: Show Warning: Already Received
+    else Not Received
+        DistributionService-->>DistributeAidScreen: false
+        Staff->>DistributeAidScreen: Confirm Distribution
+        DistributeAidScreen->>DistributionService: recordDistribution()
+        DistributionService->>Firestore: Create DistributionRecord
+        Firestore-->>DistributionService: Success
+        DistributionService->>ProgramService: Update Program Counters
+        ProgramService->>Firestore: Increment distributedCount<br/>Increment distributedQuantity
+        Firestore-->>ProgramService: Success
+        ProgramService-->>DistributionService: Success
+        DistributionService-->>DistributeAidScreen: Success
+        DistributeAidScreen-->>Staff: Show Success Message
+    end

@@ -1,0 +1,44 @@
+graph TB
+    Admin[Admin User]
+    Staff[Staff User]
+    
+    Admin --> UC1[Manage Users]
+    Admin --> UC2[Create Distribution Program]
+    Admin --> UC3[View All Beneficiaries]
+    Admin --> UC4[View Reports & Analytics]
+    Admin --> UC5[Export Data]
+    Admin --> UC6[Update Program Status]
+    Admin --> UC7[Delete Beneficiaries]
+    
+    Staff --> UC8[Register Beneficiary]
+    Staff --> UC9[View Own Beneficiaries]
+    Staff --> UC10[Distribute Aid]
+    Staff --> UC11[View Distribution Programs]
+    
+    UC1 --> UC1a[Create Staff Account]
+    UC1 --> UC1b[Update User Status]
+    UC1 --> UC1c[Delete User]
+    
+    UC2 --> UC2a[Set Target Categories]
+    UC2 --> UC2b[Set Aid Type & Quantity]
+    UC2 --> UC2c[Set Budget & Limits]
+    
+    UC8 --> UC8a[Capture Photo]
+    UC8 --> UC8b[Capture GPS Location]
+    UC8 --> UC8c[Select Vulnerable Categories]
+    UC8 --> UC8d[Calculate Urgency Score]
+    
+    UC10 --> UC10a[Check Double Distribution]
+    UC10 --> UC10b[Record Distribution]
+    UC10 --> UC10c[Update Program Counters]
+    
+    UC4 --> UC4a[View Statistics]
+    UC4 --> UC4b[View Category Breakdown]
+    UC4 --> UC4c[View Aid Type Breakdown]
+    
+    style Admin fill:#4A90E2,color:#fff
+    style Staff fill:#50C878,color:#fff
+    style UC1 fill:#FFD700
+    style UC2 fill:#FFD700
+    style UC8 fill:#50C878
+    style UC10 fill:#50C878

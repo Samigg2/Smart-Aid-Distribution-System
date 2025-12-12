@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant Staff
+    participant RegistrationScreen
+    participant CloudinaryService
+    participant BeneficiaryService
+    participant Firestore
+    participant BeneficiaryListScreen
+    
+    Staff->>RegistrationScreen: Fill Form & Submit
+    RegistrationScreen->>RegistrationScreen: Validate Form
+    alt Photo Provided
+        RegistrationScreen->>CloudinaryService: Upload Photo
+        CloudinaryService->>CloudinaryService: Compress Image
+        CloudinaryService-->>RegistrationScreen: Return Photo URL
+    end
+    RegistrationScreen->>RegistrationScreen: Calculate Urgency Score
+    RegistrationScreen->>BeneficiaryService: createBeneficiary()
+    BeneficiaryService->>Firestore: Check National ID Exists
+    Firestore-->>BeneficiaryService: Return Result
+    alt National ID Already Exists
+        BeneficiaryService-->>RegistrationScreen: Error: ID Exists
+        RegistrationScreen-->>Staff: Show Error Message
+    else National ID Available
+        BeneficiaryService->>Firestore: Create Beneficiary Document
+        Firestore-->>BeneficiaryService: Return Document ID
+        BeneficiaryService-->>RegistrationScreen: Success
+        RegistrationScreen->>BeneficiaryListScreen: Navigate
+        BeneficiaryListScreen->>Firestore: Query Beneficiaries
+        Firestore-->>BeneficiaryListScreen: Return List
+        BeneficiaryListScreen-->>Staff: Display Beneficiaries
+    end

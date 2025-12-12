@@ -1,0 +1,36 @@
+flowchart TD
+    Start([User Action]) --> Auth{Authenticated?}
+    Auth -->|No| Login[Login Screen]
+    Auth -->|Yes| Role{User Role?}
+    
+    Role -->|Admin| AdminFlow[Admin Flow]
+    Role -->|Staff| StaffFlow[Staff Flow]
+    
+    AdminFlow --> Admin1[Manage Users]
+    AdminFlow --> Admin2[Create Programs]
+    AdminFlow --> Admin3[View All Beneficiaries]
+    AdminFlow --> Admin4[View Reports]
+    AdminFlow --> Admin5[Export Data]
+    
+    StaffFlow --> Staff1[Register Beneficiary]
+    StaffFlow --> Staff2[View Own Beneficiaries]
+    StaffFlow --> Staff3[Distribute Aid]
+    
+    Staff1 --> Photo{Photo?}
+    Photo -->|Yes| Cloudinary[Upload to Cloudinary]
+    Photo -->|No| Save[Save to Firestore]
+    Cloudinary --> Save
+    
+    Staff3 --> Check{Already Received?}
+    Check -->|Yes| Block[Block Distribution]
+    Check -->|No| Record[Record Distribution]
+    Record --> Update[Update Program Counters]
+    
+    Admin2 --> Validate[Validate Program]
+    Validate --> Create[Create Program in Firestore]
+    
+    Admin4 --> Query[Query Statistics]
+    Query --> Display[Display Dashboard]
+    
+    Admin5 --> Export[Generate CSV]
+    Export --> File[Save to File System]

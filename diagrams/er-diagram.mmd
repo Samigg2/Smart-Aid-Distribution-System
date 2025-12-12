@@ -1,0 +1,80 @@
+erDiagram
+    USER ||--o{ BENEFICIARY : "registers"
+    USER ||--o{ DISTRIBUTION_PROGRAM : "creates"
+    USER ||--o{ DISTRIBUTION_RECORD : "distributes"
+    DISTRIBUTION_PROGRAM ||--o{ DISTRIBUTION_RECORD : "has"
+    BENEFICIARY ||--o{ DISTRIBUTION_RECORD : "receives"
+    
+    USER {
+        string uid PK
+        string email UK
+        string fullName
+        string phone
+        string role "admin|staff"
+        boolean isActive
+        datetime createdAt
+    }
+    
+    BENEFICIARY {
+        string beneficiaryId PK
+        string nationalId UK
+        string fullName
+        string phoneNumber
+        int age
+        string gender
+        array vulnerableCategories
+        int childrenUnder5Count
+        array childrenAges
+        int totalFamilySize
+        boolean isFemaleHeadedHousehold
+        string incomeLevel
+        boolean currentlyReceivingOtherAid
+        string region
+        string zone
+        string woreda
+        double latitude
+        double longitude
+        string photoUrl "Cloudinary URL"
+        double urgencyScore
+        string registeredBy FK
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    DISTRIBUTION_PROGRAM {
+        string programId PK
+        string programName
+        string description
+        string aidType
+        array targetCategories
+        double quantityPerBeneficiary
+        string unit
+        double totalBudget
+        int maxBeneficiaries
+        datetime startDate
+        datetime endDate
+        string status "draft|active|paused|completed|cancelled"
+        string region
+        string createdBy FK
+        int distributedCount
+        double distributedQuantity
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    DISTRIBUTION_RECORD {
+        string recordId PK
+        string programId FK
+        string beneficiaryId FK
+        string beneficiaryName "denormalized"
+        string beneficiaryNationalId "denormalized"
+        string aidType
+        double quantity
+        string unit
+        string distributedBy FK
+        string distributedByName "denormalized"
+        datetime distributedAt
+        double latitude
+        double longitude
+        string notes
+    }
