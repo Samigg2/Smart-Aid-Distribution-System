@@ -5,6 +5,7 @@ import 'login_screen.dart';
 import 'beneficiary_registration_screen.dart';
 import 'beneficiary_list_screen.dart';
 import 'distribution/distribution_programs_screen.dart';
+import 'qr_scanner_screen.dart';
 
 class StaffDashboard extends ConsumerStatefulWidget {
   const StaffDashboard({super.key});
@@ -218,6 +219,21 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const DistributionProgramsScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildActionButton(
+                'Scan QR Code',
+                'Scan beneficiary QR code for verification',
+                Icons.qr_code_scanner,
+                Colors.orange,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QRScannerScreen(),
                     ),
                   );
                 },

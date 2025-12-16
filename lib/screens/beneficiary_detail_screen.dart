@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/beneficiary_model.dart';
 import '../providers/beneficiary_provider.dart';
+import '../widgets/qr_code_widget.dart';
 
 class BeneficiaryDetailScreen extends ConsumerWidget {
   final String beneficiaryId;
@@ -118,6 +119,14 @@ class BeneficiaryDetailScreen extends ConsumerWidget {
                     ),
                   _buildInfoRow('Registered By', beneficiary.registeredBy),
                 ]),
+                const SizedBox(height: 16),
+
+                // QR Code
+                QRCodeWidget(
+                  beneficiaryId: beneficiary.beneficiaryId,
+                  nationalId: beneficiary.nationalId,
+                  fullName: beneficiary.fullName,
+                ),
               ],
             ),
           );
