@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
-import 'beneficiary_registration_screen.dart';
+import 'beneficiary_registration/registration_flow_screen.dart';
 import 'beneficiary_list_screen.dart';
 import 'distribution/distribution_programs_screen.dart';
 import 'qr_scanner_screen.dart';
@@ -187,8 +187,7 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const BeneficiaryRegistrationScreen(),
+                      builder: (context) => const RegistrationFlowScreen(),
                     ),
                   );
                 },

@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/beneficiary_model.dart';
 import '../providers/beneficiary_provider.dart';
 import '../providers/auth_provider.dart';
-import 'beneficiary_registration_screen.dart';
+import 'beneficiary_registration/registration_flow_screen.dart';
 import 'beneficiary_detail_screen.dart';
 
 class BeneficiaryListScreen extends ConsumerStatefulWidget {
@@ -46,7 +46,7 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const BeneficiaryRegistrationScreen(),
+                  builder: (context) => const RegistrationFlowScreen(),
                 ),
               );
             },
