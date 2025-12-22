@@ -120,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),
@@ -149,7 +149,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.blue.withOpacity(0.3),
+                                          color: Colors.blue.withValues(
+                                            alpha: 0.3,
+                                          ),
                                           blurRadius: 20,
                                           offset: const Offset(0, 5),
                                         ),
@@ -329,7 +331,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       elevation: 3,
-                                      shadowColor: Colors.blue.withOpacity(0.5),
+                                      shadowColor: Colors.blue.withValues(
+                                        alpha: 0.5,
+                                      ),
                                     ),
                                     child: _isLoading
                                         ? const SizedBox(

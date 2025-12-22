@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../models/user_model.dart';
+import '../utils/logger.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -24,8 +25,8 @@ class FirestoreService {
         return UserModel.fromFirestore(doc);
       }
       return null;
-    } catch (e) {
-      print('Error getting user: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting user', error: e, stackTrace: stackTrace, tag: 'FirestoreService');
       return null;
     }
   }
@@ -93,8 +94,8 @@ class FirestoreService {
         'staff': staff.docs.length,
         'active': activeUsers.docs.length,
       };
-    } catch (e) {
-      print('Error getting statistics: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting statistics', error: e, stackTrace: stackTrace, tag: 'FirestoreService');
       return {
         'total': 0,
         'admins': 0,

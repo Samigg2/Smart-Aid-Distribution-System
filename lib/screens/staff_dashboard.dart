@@ -287,7 +287,7 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, size: 28, color: color),

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
+import 'config/env_config.dart';
 import 'widgets/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize environment configuration (loads .env if available)
+  await EnvConfig.initialize();
   
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -20,7 +25,11 @@ void main() async {
     );
   } catch (e) {
     // Persistence might already be enabled or not supported on this platform
-    print('Persistence setup: $e');
+    // Note: enablePersistence is deprecated, but still works
+    // Firestore automatically enables persistence on mobile platforms
+    if (kDebugMode) {
+      debugPrint('Persistence setup: $e');
+    }
   }
   
   runApp(

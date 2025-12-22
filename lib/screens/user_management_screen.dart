@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/firestore_provider.dart';
 import '../models/user_model.dart';
+import '../utils/logger.dart';
 import 'package:intl/intl.dart';
 
 class UserManagementScreen extends ConsumerStatefulWidget {
@@ -91,8 +92,7 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (error, stack) {
-                    print('Error loading users: $error');
-                    print('Stack trace: $stack');
+                    Logger.error('Error loading users', error: error, stackTrace: stack, tag: 'UserManagementScreen');
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

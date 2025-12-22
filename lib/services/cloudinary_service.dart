@@ -6,13 +6,14 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
+import '../config/env_config.dart';
+import '../utils/logger.dart';
 
 class CloudinaryService {
-  // TODO: Replace with your Cloudinary credentials from https://cloudinary.com
-  // Get these from your Cloudinary dashboard (FREE account)
-  static const String _cloudName = 'dpz0f6t0k';
-  static const String _apiKey = '147546184473829';
-  static const String _apiSecret = 'yjZNlKPPBZ-FJNg75ZqAJOtrBkA';
+  // Get credentials from environment configuration
+  String get _cloudName => EnvConfig.cloudName;
+  String get _apiKey => EnvConfig.apiKey;
+  String get _apiSecret => EnvConfig.apiSecret;
 
   // Upload beneficiary photo to Cloudinary using REST API
   Future<String> uploadBeneficiaryPhoto(File imageFile) async {
@@ -67,8 +68,8 @@ class CloudinaryService {
       } else {
         throw Exception('Upload failed: ${response.body}');
       }
-    } catch (e) {
-      print('Error uploading to Cloudinary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error uploading to Cloudinary', error: e, stackTrace: stackTrace, tag: 'CloudinaryService');
       Fluttertoast.showToast(msg: 'Failed to upload photo: $e');
       rethrow;
     }
@@ -130,8 +131,8 @@ class CloudinaryService {
       await compressedFile.writeAsBytes(compressedBytes);
 
       return compressedFile;
-    } catch (e) {
-      print('Error compressing image: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error compressing image', error: e, stackTrace: stackTrace, tag: 'CloudinaryService');
       // Return original file if compression fails
       return imageFile;
     }
@@ -156,8 +157,8 @@ class CloudinaryService {
       );
 
       return response.statusCode == 200;
-    } catch (e) {
-      print('Error deleting from Cloudinary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error deleting from Cloudinary', error: e, stackTrace: stackTrace, tag: 'CloudinaryService');
       return false;
     }
   }

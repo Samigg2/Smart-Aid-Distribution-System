@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../models/beneficiary_model.dart';
 import '../models/distribution_model.dart';
+import '../utils/logger.dart';
 
 class ExportService {
   /// Export beneficiaries to CSV file
@@ -74,8 +75,8 @@ class ExportService {
       );
 
       return filePath;
-    } catch (e) {
-      print('Error exporting beneficiaries: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error exporting beneficiaries', error: e, stackTrace: stackTrace, tag: 'ExportService');
       return null;
     }
   }
@@ -133,8 +134,8 @@ class ExportService {
       );
 
       return filePath;
-    } catch (e) {
-      print('Error exporting distributions: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error exporting distributions', error: e, stackTrace: stackTrace, tag: 'ExportService');
       return null;
     }
   }
@@ -195,8 +196,8 @@ class ExportService {
       );
 
       return filePath;
-    } catch (e) {
-      print('Error exporting program summary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error exporting program summary', error: e, stackTrace: stackTrace, tag: 'ExportService');
       return null;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/beneficiary_model.dart';
 import '../../models/beneficiary_registration_data.dart';
@@ -53,9 +54,7 @@ class _Step1PersonalInfoScreenState
     // Update data
     widget.data.fullName = _fullNameController.text.trim();
     widget.data.nationalId = _nationalIdController.text.trim();
-    widget.data.phoneNumber = _phoneController.text.trim().isEmpty
-        ? null
-        : _phoneController.text.trim();
+    widget.data.phoneNumber = _phoneController.text.trim();
     widget.data.age = int.tryParse(_ageController.text);
 
     // Validate categories
@@ -143,8 +142,13 @@ class _Step1PersonalInfoScreenState
                     controller: _nationalIdController,
                     label: 'National ID Number *',
                     icon: Icons.credit_card,
-                    validator: (value) =>
-                        value?.isEmpty ?? true ? 'Required' : null,
+                    keyboardType: TextInputType.number,
+                    validator: BeneficiaryValidator.validateNationalId,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(12),
+                    ],
+                    hintText: '12-digit national ID',
                   ),
                   const SizedBox(height: 12),
                   _buildTextField(
@@ -152,6 +156,17 @@ class _Step1PersonalInfoScreenState
                     label: 'Phone Number',
                     icon: Icons.phone,
                     keyboardType: TextInputType.phone,
+                    validator: (value) =>
+                        BeneficiaryValidator.validateEthiopianPhone(
+                          value,
+                          isRequired: true,
+                        ),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    hintText: '0988277799 or 988277799',
+                    prefixText: '+251 ',
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -225,7 +240,7 @@ class _Step1PersonalInfoScreenState
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),
@@ -341,15 +356,21 @@ class _Step1PersonalInfoScreenState
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     void Function(String)? onChanged,
+    List<TextInputFormatter>? inputFormatters,
+    String? hintText,
+    String? prefixText,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
       onChanged: onChanged,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
+        hintText: hintText,
         prefixIcon: Icon(icon),
+        prefixText: prefixText,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.white,

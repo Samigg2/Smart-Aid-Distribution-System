@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../models/distribution_model.dart';
 import '../models/beneficiary_model.dart';
+import '../utils/logger.dart';
 
 class DistributionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -16,8 +17,8 @@ class DistributionService {
       );
       Fluttertoast.showToast(msg: 'Program created successfully');
       return docRef.id;
-    } catch (e) {
-      print('Error creating program: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error creating program', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       Fluttertoast.showToast(msg: 'Failed to create program');
       return null;
     }
@@ -63,8 +64,8 @@ class DistributionService {
         return DistributionProgram.fromFirestore(doc);
       }
       return null;
-    } catch (e) {
-      print('Error getting program: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting program', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       return null;
     }
   }
@@ -78,8 +79,8 @@ class DistributionService {
       });
       Fluttertoast.showToast(msg: 'Program status updated');
       return true;
-    } catch (e) {
-      print('Error updating program status: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error updating program status', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       Fluttertoast.showToast(msg: 'Failed to update status');
       return false;
     }
@@ -113,8 +114,8 @@ class DistributionService {
       eligible.sort((a, b) => b.urgencyScore.compareTo(a.urgencyScore));
 
       return eligible;
-    } catch (e) {
-      print('Error getting eligible beneficiaries: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting eligible beneficiaries', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       return [];
     }
   }
@@ -131,8 +132,8 @@ class DistributionService {
           .limit(1)
           .get();
       return snapshot.docs.isNotEmpty;
-    } catch (e) {
-      print('Error checking distribution: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error checking distribution', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       return false; // Allow distribution on error (fail open)
     }
   }
@@ -170,8 +171,8 @@ class DistributionService {
 
       Fluttertoast.showToast(msg: 'Distribution recorded successfully');
       return docRef.id;
-    } catch (e) {
-      print('Error recording distribution: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error recording distribution', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       Fluttertoast.showToast(msg: 'Failed to record distribution');
       return null;
     }
@@ -282,8 +283,8 @@ class DistributionService {
         'uniqueBeneficiariesReached': uniqueBeneficiaries.length,
         'byAidType': byAidType,
       };
-    } catch (e) {
-      print('Error getting distribution stats: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting distribution stats', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       return {
         'totalPrograms': 0,
         'activePrograms': 0,
@@ -307,8 +308,8 @@ class DistributionService {
           .toList();
       records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
       return records;
-    } catch (e) {
-      print('Error getting distributions for export: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting distributions for export', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       return [];
     }
   }
@@ -327,8 +328,8 @@ class DistributionService {
           .toList();
       records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
       return records;
-    } catch (e) {
-      print('Error getting program distributions for export: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting program distributions for export', error: e, stackTrace: stackTrace, tag: 'DistributionService');
       return [];
     }
   }

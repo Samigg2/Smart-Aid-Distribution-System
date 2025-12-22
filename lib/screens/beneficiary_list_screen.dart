@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/beneficiary_model.dart';
 import '../providers/beneficiary_provider.dart';
 import '../providers/auth_provider.dart';
+import '../utils/logger.dart';
 import 'beneficiary_registration/registration_flow_screen.dart';
 import 'beneficiary_detail_screen.dart';
 
@@ -221,8 +222,7 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) {
-                print('Error loading beneficiaries: $error');
-                print('Stack trace: $stack');
+                Logger.error('Error loading beneficiaries', error: error, stackTrace: stack, tag: 'BeneficiaryListScreen');
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(32.0),

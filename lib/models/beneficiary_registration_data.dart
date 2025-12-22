@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../utils/beneficiary_validator.dart';
 
 /// Shared data model for multi-step beneficiary registration
 class BeneficiaryRegistrationData {
@@ -60,8 +61,16 @@ class BeneficiaryRegistrationData {
     if (fullName == null || fullName!.trim().isEmpty) {
       errors.add('Full name is required');
     }
-    if (nationalId == null || nationalId!.trim().isEmpty) {
-      errors.add('National ID is required');
+    final nationalIdError = BeneficiaryValidator.validateNationalId(nationalId);
+    if (nationalIdError != null) {
+      errors.add(nationalIdError);
+    }
+    final phoneError = BeneficiaryValidator.validateEthiopianPhone(
+      phoneNumber,
+      isRequired: true,
+    );
+    if (phoneError != null) {
+      errors.add(phoneError);
     }
     if (selectedCategories.isEmpty) {
       errors.add('Please select at least one vulnerable category');

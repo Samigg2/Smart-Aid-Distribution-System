@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../models/beneficiary_model.dart';
+import '../utils/logger.dart';
 
 class BeneficiaryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -44,8 +45,8 @@ class BeneficiaryService {
 
       Fluttertoast.showToast(msg: 'Beneficiary registered successfully');
       return beneficiaryId;
-    } catch (e) {
-      print('Error creating beneficiary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error creating beneficiary', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       Fluttertoast.showToast(msg: 'Failed to register beneficiary');
       return null;
     }
@@ -92,8 +93,8 @@ class BeneficiaryService {
         return BeneficiaryModel.fromFirestore(doc);
       }
       return null;
-    } catch (e) {
-      print('Error getting beneficiary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting beneficiary', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       return null;
     }
   }
@@ -126,8 +127,8 @@ class BeneficiaryService {
       return allDocs.values
           .map((doc) => BeneficiaryModel.fromFirestore(doc))
           .toList();
-    } catch (e) {
-      print('Error searching beneficiaries: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error searching beneficiaries', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       return [];
     }
   }
@@ -152,8 +153,8 @@ class BeneficiaryService {
 
       Fluttertoast.showToast(msg: 'Beneficiary updated successfully');
       return true;
-    } catch (e) {
-      print('Error updating beneficiary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error updating beneficiary', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       Fluttertoast.showToast(msg: 'Failed to update beneficiary');
       return false;
     }
@@ -166,8 +167,8 @@ class BeneficiaryService {
 
       Fluttertoast.showToast(msg: 'Beneficiary deleted');
       return true;
-    } catch (e) {
-      print('Error deleting beneficiary: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error deleting beneficiary', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       Fluttertoast.showToast(msg: 'Failed to delete beneficiary');
       return false;
     }
@@ -183,8 +184,8 @@ class BeneficiaryService {
       return snapshot.docs
           .map((doc) => BeneficiaryModel.fromFirestore(doc))
           .toList();
-    } catch (e) {
-      print('Error getting beneficiaries for export: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting beneficiaries for export', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       return [];
     }
   }
@@ -217,8 +218,8 @@ class BeneficiaryService {
         'withChildren': withChildren.docs.length,
         'femaleHeaded': femaleHeaded.docs.length,
       };
-    } catch (e) {
-      print('Error getting statistics: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting statistics', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');
       return {'total': 0, 'pregnant': 0, 'withChildren': 0, 'femaleHeaded': 0};
     }
   }

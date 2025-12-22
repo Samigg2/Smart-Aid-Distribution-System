@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../models/user_model.dart';
+import '../utils/logger.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -61,7 +62,7 @@ class AuthService {
       if (e.code == 'user-not-found') {
         message = 'No user found with this email';
       } else if (e.code == 'wrong-password') {
-        message = 'Incorrect password';
+        message = 'Incorrect email or password';
       } else if (e.code == 'invalid-email') {
         message = 'Invalid email address';
       } else if (e.code == 'user-disabled') {
@@ -70,7 +71,7 @@ class AuthService {
       Fluttertoast.showToast(msg: message);
       return null;
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error: ${e.toString()}');
+      Fluttertoast.showToast(msg: 'Incorrect email or password');
       return null;
     }
   }
@@ -150,8 +151,8 @@ class AuthService {
       if (!userDoc.exists) return null;
 
       return UserModel.fromFirestore(userDoc);
-    } catch (e) {
-      print('Error getting user data: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error getting user data', error: e, stackTrace: stackTrace, tag: 'AuthService');
       return null;
     }
   }

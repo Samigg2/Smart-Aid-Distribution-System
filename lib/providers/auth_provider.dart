@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
+import '../utils/logger.dart';
 
 // AuthService provider (singleton)
 final authServiceProvider = Provider<AuthService>((ref) {
@@ -33,8 +34,8 @@ final currentUserDataStreamProvider = StreamProvider<UserModel?>((ref) {
     try {
       // Get user data from Firestore
       return await authService.getCurrentUserData();
-    } catch (e) {
-      print('Error fetching user data: $e');
+    } catch (e, stackTrace) {
+      Logger.error('Error fetching user data', error: e, stackTrace: stackTrace, tag: 'AuthProvider');
       return null;
     }
   });

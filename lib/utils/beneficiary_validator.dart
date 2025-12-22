@@ -1,4 +1,31 @@
 class BeneficiaryValidator {
+  static String? validateNationalId(String? nationalId) {
+    if (nationalId == null || nationalId.trim().isEmpty) {
+      return 'National ID is required';
+    }
+    final sanitized = nationalId.trim();
+    final regExp = RegExp(r'^\d{12}$');
+    if (!regExp.hasMatch(sanitized)) {
+      return 'National ID must be exactly 12 digits';
+    }
+    return null;
+  }
+
+  static String? validateEthiopianPhone(
+    String? phoneNumber, {
+    bool isRequired = false,
+  }) {
+    if (phoneNumber == null || phoneNumber.trim().isEmpty) {
+      return isRequired ? 'Phone number is required' : null;
+    }
+    final sanitized = phoneNumber.trim();
+    final regExp = RegExp(r'^(09\d{8}|9\d{8})$');
+    if (!regExp.hasMatch(sanitized)) {
+      return 'Phone must match Ethiopian format (e.g., 0988277799 or 988277799)';
+    }
+    return null;
+  }
+
   /// Check if two categories conflict with each other
   static bool areCategoriesConflicting(String category1, String category2) {
     // Pregnant woman cannot be elderly (60+)
