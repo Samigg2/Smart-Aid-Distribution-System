@@ -18,7 +18,39 @@ class AdminDashboard extends ConsumerStatefulWidget {
 class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   Future<void> _handleLogout() async {
     final authService = ref.read(authServiceProvider);
-    await authService.signOut();
+    final keepOffline = await authService.isOfflineLoginEnabled();
+    
+    // Show dialog if offline access is enabled
+    if (keepOffline) {
+      final shouldKeep = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Logout Options'),
+          content: const Text(
+            'You have offline access enabled. Do you want to keep your session active for offline login in remote areas?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Full Logout'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[700],
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Keep for Offline'),
+            ),
+          ],
+        ),
+      );
+      
+      await authService.signOut(keepOfflineAccess: shouldKeep ?? false);
+    } else {
+      await authService.signOut();
+    }
+    
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),

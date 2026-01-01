@@ -45,7 +45,11 @@ class DistributionProgramsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[400]),
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'No distribution programs yet',
@@ -125,7 +129,8 @@ class DistributionProgramsScreen extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProgramDetailScreen(programId: program.programId),
+              builder: (context) =>
+                  ProgramDetailScreen(programId: program.programId),
             ),
           );
         },
@@ -165,13 +170,19 @@ class DistributionProgramsScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           aidType.label,
-                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -190,7 +201,8 @@ class DistributionProgramsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
 
               // Description
-              if (program.description != null && program.description!.isNotEmpty)
+              if (program.description != null &&
+                  program.description!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
@@ -207,7 +219,10 @@ class DistributionProgramsScreen extends ConsumerWidget {
                 runSpacing: 8,
                 children: program.targetCategories.take(3).map((cat) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue[50],
                       borderRadius: BorderRadius.circular(12),
@@ -294,16 +309,8 @@ class DistributionProgramsScreen extends ConsumerWidget {
         return Icons.medical_services;
       case AidType.cash:
         return Icons.payments;
-      case AidType.clothing:
-        return Icons.checkroom;
-      case AidType.shelter:
-        return Icons.home;
-      case AidType.water:
-        return Icons.water_drop;
       case AidType.nutrition:
         return Icons.egg;
-      case AidType.education:
-        return Icons.school;
       default:
         return Icons.category;
     }
@@ -328,5 +335,3 @@ class DistributionProgramsScreen extends ConsumerWidget {
     }
   }
 }
-
-

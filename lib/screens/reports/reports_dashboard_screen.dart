@@ -443,13 +443,56 @@ class ReportsDashboardScreen extends ConsumerWidget {
       Navigator.pop(context); // Close loading dialog
 
       if (filePath != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Exported to: $filePath'),
-            action: SnackBarAction(
-              label: 'OK',
-              onPressed: () {},
+        final exportPath = filePath;
+        final fileName = exportPath.split('/').last;
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 28),
+                SizedBox(width: 8),
+                Text('Export Successful'),
+              ],
             ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'File exported successfully!',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text('File: $fileName'),
+                const SizedBox(height: 8),
+                Text(
+                  'Location:',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                Text(
+                  exportPath,
+                  style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Look in: Downloads folder or App Documents',
+                  style: TextStyle(fontSize: 11, color: Colors.blue[700], fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green[700],
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('OK'),
+              ),
+            ],
           ),
         );
       }

@@ -364,16 +364,8 @@ class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen>
         return Icons.medical_services;
       case AidType.cash:
         return Icons.payments;
-      case AidType.clothing:
-        return Icons.checkroom;
-      case AidType.shelter:
-        return Icons.home;
-      case AidType.water:
-        return Icons.water_drop;
       case AidType.nutrition:
         return Icons.egg;
-      case AidType.education:
-        return Icons.school;
       default:
         return Icons.category;
     }

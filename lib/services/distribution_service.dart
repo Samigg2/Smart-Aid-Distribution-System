@@ -154,20 +154,25 @@ class DistributionService {
         return null;
       }
 
+      // Use batch write to ensure atomicity - both operations succeed or both fail
+      final batch = _firestore.batch();
+
       // Create the distribution record
-      final docRef = await _firestore.collection('distribution_records').add(
-        record.toMap(),
-      );
+      final docRef = _firestore.collection('distribution_records').doc();
+      batch.set(docRef, record.toMap());
 
       // Update program counters
-      await _firestore
+      final programRef = _firestore
           .collection('distribution_programs')
-          .doc(record.programId)
-          .update({
+          .doc(record.programId);
+      batch.update(programRef, {
         'distributedCount': FieldValue.increment(1),
         'distributedQuantity': FieldValue.increment(record.quantity),
         'updatedAt': Timestamp.now(),
       });
+
+      // Commit the batch - both writes succeed or both fail
+      await batch.commit();
 
       Fluttertoast.showToast(msg: 'Distribution recorded successfully');
       return docRef.id;

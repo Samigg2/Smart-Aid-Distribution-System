@@ -212,17 +212,54 @@ class ExportService {
 
   /// Save content to file and return path
   Future<String> _saveToFile(String fileName, String content) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final exportDir = Directory('${directory.path}/exports');
+    Directory exportDir;
+    
+    try {
+      // Try to save to Downloads folder (more accessible on Android)
+      if (Platform.isAndroid) {
+        // For Android, use external storage Downloads directory
+        final externalDir = await getExternalStorageDirectory();
+        if (externalDir != null) {
+          // Navigate to Downloads folder
+          final downloadsPath = '${externalDir.path.split('/Android')[0]}/Download';
+          exportDir = Directory(downloadsPath);
+        } else {
+          // Fallback to app documents directory
+          final directory = await getApplicationDocumentsDirectory();
+          exportDir = Directory('${directory.path}/exports');
+        }
+      } else if (Platform.isIOS) {
+        // For iOS, use app documents directory
+        final directory = await getApplicationDocumentsDirectory();
+        exportDir = Directory('${directory.path}/exports');
+      } else {
+        // For other platforms, use app documents directory
+        final directory = await getApplicationDocumentsDirectory();
+        exportDir = Directory('${directory.path}/exports');
+      }
 
-    if (!await exportDir.exists()) {
-      await exportDir.create(recursive: true);
+      if (!await exportDir.exists()) {
+        await exportDir.create(recursive: true);
+      }
+
+      final file = File('${exportDir.path}/$fileName');
+      await file.writeAsString(content);
+
+      return file.path;
+    } catch (e) {
+      // Fallback to app documents directory if Downloads fails
+      final directory = await getApplicationDocumentsDirectory();
+      exportDir = Directory('${directory.path}/exports');
+      
+      if (!await exportDir.exists()) {
+        await exportDir.create(recursive: true);
+      }
+
+      final file = File('${exportDir.path}/$fileName');
+      await file.writeAsString(content);
+
+      return file.path;
     }
-
-    final file = File('${exportDir.path}/$fileName');
-    await file.writeAsString(content);
-
-    return file.path;
   }
 }
 

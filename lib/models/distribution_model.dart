@@ -5,11 +5,7 @@ enum AidType {
   food('food', 'Food Package'),
   medicine('medicine', 'Medicine/Medical Supplies'),
   cash('cash', 'Cash Transfer'),
-  clothing('clothing', 'Clothing'),
-  shelter('shelter', 'Shelter Materials'),
-  water('water', 'Water/Hygiene Kit'),
   nutrition('nutrition', 'Nutritional Supplements'),
-  education('education', 'Education Materials'),
   other('other', 'Other');
 
   final String value;
@@ -170,7 +166,8 @@ class DistributionProgram {
       description: description ?? this.description,
       aidType: aidType ?? this.aidType,
       targetCategories: targetCategories ?? this.targetCategories,
-      quantityPerBeneficiary: quantityPerBeneficiary ?? this.quantityPerBeneficiary,
+      quantityPerBeneficiary:
+          quantityPerBeneficiary ?? this.quantityPerBeneficiary,
       unit: unit ?? this.unit,
       totalBudget: totalBudget ?? this.totalBudget,
       maxBeneficiaries: maxBeneficiaries ?? this.maxBeneficiaries,
@@ -269,4 +266,3 @@ class DistributionRecord {
     };
   }
 }
-

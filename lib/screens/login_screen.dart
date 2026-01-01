@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _rememberMe = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -60,6 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     UserModel? user = await authService.signInWithEmailPassword(
       _emailController.text.trim(),
       _passwordController.text,
+      rememberMe: _rememberMe,
     );
 
     setState(() => _isLoading = false);
@@ -295,6 +297,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     }
                                     return null;
                                   },
+                                ),
+                                const SizedBox(height: 12),
+
+                                // Remember Me checkbox
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: _rememberMe,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _rememberMe = value ?? false;
+                                        });
+                                      },
+                                      activeColor: Colors.blue[700],
+                                    ),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _rememberMe = !_rememberMe;
+                                          });
+                                        },
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Remember Me (Offline Access)',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.grey[800],
+                                              ),
+                                            ),
+                                            Text(
+                                              'Enable offline login for remote areas',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 12),
 

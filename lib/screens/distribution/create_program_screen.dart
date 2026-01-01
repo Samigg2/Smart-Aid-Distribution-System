@@ -9,7 +9,8 @@ class CreateProgramScreen extends ConsumerStatefulWidget {
   const CreateProgramScreen({super.key});
 
   @override
-  ConsumerState<CreateProgramScreen> createState() => _CreateProgramScreenState();
+  ConsumerState<CreateProgramScreen> createState() =>
+      _CreateProgramScreenState();
 }
 
 class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
@@ -19,7 +20,7 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
-  final _unitController = TextEditingController(text: 'kg');
+  final _unitController = TextEditingController(text: 'pcs');
   final _budgetController = TextEditingController();
   final _maxBeneficiariesController = TextEditingController();
 
@@ -85,7 +86,9 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
 
     if (_selectedCategories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one target category')),
+        const SnackBar(
+          content: Text('Please select at least one target category'),
+        ),
       );
       return;
     }
@@ -124,9 +127,9 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -152,213 +155,225 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Program Info Card
-              _buildSectionCard(
-                'Program Information',
-                Icons.info,
-                [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Program Name *',
-                      hintText: 'e.g., Food Distribution Q1 2025',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+              _buildSectionCard('Program Information', Icons.info, [
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Program Name *',
+                    hintText: 'e.g., Food Distribution Q1 2025',
+                    border: OutlineInputBorder(),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      hintText: 'Brief description of this program',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 3,
+                  validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Brief description of this program',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-              ),
+                  maxLines: 3,
+                ),
+              ]),
               const SizedBox(height: 16),
 
               // Aid Type Card
-              _buildSectionCard(
-                'Aid Details',
-                Icons.inventory,
-                [
-                  DropdownButtonFormField<String>(
-                    value: _aidType,
-                    decoration: const InputDecoration(
-                      labelText: 'Aid Type *',
-                      border: OutlineInputBorder(),
+              _buildSectionCard('Aid Details', Icons.inventory, [
+                DropdownButtonFormField<String>(
+                  value: _aidType,
+                  decoration: const InputDecoration(
+                    labelText: 'Aid Type *',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: AidType.values.map((type) {
+                    return DropdownMenuItem(
+                      value: type.value,
+                      child: Text(type.label),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    setState(() {
+                      _aidType = v!;
+                      // Update default unit based on aid type
+                      switch (_aidType) {
+                        case 'food':
+                          _unitController.text = 'kg';
+                          break;
+                        case 'medicine':
+                          _unitController.text = 'pcs';
+                          break;
+                        case 'cash':
+                          _unitController.text = 'ETB';
+                          break;
+                        case 'nutrition':
+                          _unitController.text = 'pcs';
+                          break;
+                        default:
+                          _unitController.text = 'pcs';
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextFormField(
+                        controller: _quantityController,
+                        decoration: const InputDecoration(
+                          labelText: 'Quantity Per Person *',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) =>
+                            v?.isEmpty ?? true ? 'Required' : null,
+                      ),
                     ),
-                    items: AidType.values.map((type) {
-                      return DropdownMenuItem(
-                        value: type.value,
-                        child: Text(type.label),
-                      );
-                    }).toList(),
-                    onChanged: (v) => setState(() => _aidType = v!),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: _quantityController,
-                          decoration: const InputDecoration(
-                            labelText: 'Quantity Per Person *',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _unitController,
+                        decoration: const InputDecoration(
+                          labelText: 'Unit *',
+                          hintText: 'kg, ETB, pcs',
+                          border: OutlineInputBorder(),
                         ),
+                        validator: (v) =>
+                            v?.isEmpty ?? true ? 'Required' : null,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _unitController,
-                          decoration: const InputDecoration(
-                            labelText: 'Unit *',
-                            hintText: 'kg, ETB, pcs',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (v) => v?.isEmpty ?? true ? 'Required' : null,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _budgetController,
+                        decoration: const InputDecoration(
+                          labelText: 'Total Budget (ETB) *',
+                          hintText: 'Always in Ethiopian Birr',
+                          helperText:
+                              'Budget is always in ETB, regardless of aid type',
+                          border: OutlineInputBorder(),
                         ),
+                        keyboardType: TextInputType.number,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _budgetController,
-                          decoration: const InputDecoration(
-                            labelText: 'Total Budget (ETB)',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _maxBeneficiariesController,
+                        decoration: const InputDecoration(
+                          labelText: 'Max Beneficiaries',
+                          border: OutlineInputBorder(),
                         ),
+                        keyboardType: TextInputType.number,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _maxBeneficiariesController,
-                          decoration: const InputDecoration(
-                            labelText: 'Max Beneficiaries',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ]),
               const SizedBox(height: 16),
 
               // Target Categories Card
-              _buildSectionCard(
-                'Target Categories *',
-                Icons.people,
-                [
-                  const Text(
-                    'Select which vulnerable groups this program targets:',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 12),
-                  ...VulnerableCategory.values.map((cat) {
-                    return CheckboxListTile(
-                      title: Text(cat.label),
-                      value: _selectedCategories.contains(cat.value),
-                      onChanged: (v) {
-                        setState(() {
-                          if (v == true) {
-                            _selectedCategories.add(cat.value);
-                          } else {
-                            _selectedCategories.remove(cat.value);
-                          }
-                        });
-                      },
-                      dense: true,
-                      activeColor: Colors.green[700],
-                    );
-                  }),
-                ],
-              ),
+              _buildSectionCard('Target Categories *', Icons.people, [
+                const Text(
+                  'Select which vulnerable groups this program targets:',
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 12),
+                ...VulnerableCategory.values.map((cat) {
+                  return CheckboxListTile(
+                    title: Text(cat.label),
+                    value: _selectedCategories.contains(cat.value),
+                    onChanged: (v) {
+                      setState(() {
+                        if (v == true) {
+                          _selectedCategories.add(cat.value);
+                        } else {
+                          _selectedCategories.remove(cat.value);
+                        }
+                      });
+                    },
+                    dense: true,
+                    activeColor: Colors.green[700],
+                  );
+                }),
+              ]),
               const SizedBox(height: 16),
 
               // Location & Dates Card
-              _buildSectionCard(
-                'Location & Duration',
-                Icons.calendar_today,
-                [
-                  DropdownButtonFormField<String>(
-                    value: _selectedRegion,
-                    decoration: const InputDecoration(
-                      labelText: 'Target Region (optional)',
-                      hintText: 'All regions if not selected',
-                      border: OutlineInputBorder(),
+              _buildSectionCard('Location & Duration', Icons.calendar_today, [
+                DropdownButtonFormField<String>(
+                  value: _selectedRegion,
+                  decoration: const InputDecoration(
+                    labelText: 'Target Region (optional)',
+                    hintText: 'All regions if not selected',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Regions'),
                     ),
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('All Regions'),
-                      ),
-                      ..._regions.map((r) => DropdownMenuItem(value: r, child: Text(r))),
-                    ],
-                    onChanged: (v) => setState(() => _selectedRegion = v),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InkWell(
-                          onTap: _selectStartDate,
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'Start Date *',
-                              border: OutlineInputBorder(),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${_startDate.day}/${_startDate.month}/${_startDate.year}',
-                                ),
-                                const Icon(Icons.calendar_today, size: 18),
-                              ],
-                            ),
+                    ..._regions.map(
+                      (r) => DropdownMenuItem(value: r, child: Text(r)),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _selectedRegion = v),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectStartDate,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Start Date *',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${_startDate.day}/${_startDate.month}/${_startDate.year}',
+                              ),
+                              const Icon(Icons.calendar_today, size: 18),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: InkWell(
-                          onTap: _selectEndDate,
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'End Date',
-                              border: OutlineInputBorder(),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  _endDate != null
-                                      ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                                      : 'No end date',
-                                ),
-                                const Icon(Icons.calendar_today, size: 18),
-                              ],
-                            ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InkWell(
+                        onTap: _selectEndDate,
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'End Date',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _endDate != null
+                                    ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
+                                    : 'No end date',
+                              ),
+                              const Icon(Icons.calendar_today, size: 18),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ]),
               const SizedBox(height: 24),
 
               // Create Button
@@ -375,7 +390,10 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Create Program',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -402,7 +420,10 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
                 const SizedBox(width: 8),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -414,5 +435,3 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
     );
   }
 }
-
-

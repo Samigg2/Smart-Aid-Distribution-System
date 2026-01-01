@@ -17,16 +17,22 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   
   // Enable offline persistence (caches data locally for offline access)
-  // Note: On mobile, this is enabled by default, but we're being explicit
-  // This allows the app to work offline by using cached data
+  // This allows the app to work offline by using cached data from Firestore
+  // When offline:
+  //   - Reads use cached data automatically
+  //   - Writes are queued and synced when connection is restored
+  //   - All changes are synchronized automatically
+  // Note: On mobile (Android/iOS), persistence is enabled by default
+  // This explicit call ensures it's enabled and allows tab synchronization on web
   try {
     await FirebaseFirestore.instance.enablePersistence(
       const PersistenceSettings(synchronizeTabs: true),
     );
   } catch (e) {
     // Persistence might already be enabled or not supported on this platform
-    // Note: enablePersistence is deprecated, but still works
+    // Note: enablePersistence is deprecated but still works
     // Firestore automatically enables persistence on mobile platforms
+    // The app will work offline with cached data regardless
     if (kDebugMode) {
       debugPrint('Persistence setup: $e');
     }
