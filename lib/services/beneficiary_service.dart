@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'dart:async';
 import '../models/beneficiary_model.dart';
 import '../utils/logger.dart';
 
@@ -37,13 +38,32 @@ class BeneficiaryService {
       // Generate beneficiary ID
       final beneficiaryId = _generateBeneficiaryId();
 
-      // Create document
-      await _firestore
+      // Create document - Firestore automatically queues when offline
+      final writeFuture = _firestore
           .collection('beneficiaries')
           .doc(beneficiaryId)
           .set(beneficiary.copyWith(beneficiaryId: beneficiaryId).toMap());
-
-      Fluttertoast.showToast(msg: 'Beneficiary registered successfully');
+      
+      // Wait with timeout - if offline, operation is queued but await hangs
+      // So we timeout and assume it's queued
+      try {
+        await writeFuture.timeout(
+          const Duration(seconds: 3),
+          onTimeout: () {
+            // Throw timeout to indicate operation was queued
+            throw TimeoutException('Write queued offline', const Duration(seconds: 3));
+          },
+        );
+        Fluttertoast.showToast(msg: 'Beneficiary registered successfully');
+      } on TimeoutException {
+        // Operation was queued offline - Firestore will sync automatically
+        Logger.info('Write queued offline - will sync when online', tag: 'BeneficiaryService');
+        Fluttertoast.showToast(
+          msg: 'Beneficiary queued for sync. Will be saved when online.',
+          toastLength: Toast.LENGTH_LONG,
+        );
+        // Operation is still queued in Firestore, just not confirmed yet
+      }
       return beneficiaryId;
     } catch (e, stackTrace) {
       Logger.error('Error creating beneficiary', error: e, stackTrace: stackTrace, tag: 'BeneficiaryService');

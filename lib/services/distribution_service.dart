@@ -12,13 +12,18 @@ class DistributionService {
   /// Create a new distribution program
   Future<String?> createProgram(DistributionProgram program) async {
     try {
-      final docRef = await _firestore.collection('distribution_programs').add(
-        program.toMap(),
-      );
+      final docRef = await _firestore
+          .collection('distribution_programs')
+          .add(program.toMap());
       Fluttertoast.showToast(msg: 'Program created successfully');
       return docRef.id;
     } catch (e, stackTrace) {
-      Logger.error('Error creating program', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error creating program',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       Fluttertoast.showToast(msg: 'Failed to create program');
       return null;
     }
@@ -26,10 +31,9 @@ class DistributionService {
 
   /// Get all distribution programs (sorted in memory)
   Stream<List<DistributionProgram>> getAllPrograms() {
-    return _firestore
-        .collection('distribution_programs')
-        .snapshots()
-        .map((snapshot) {
+    return _firestore.collection('distribution_programs').snapshots().map((
+      snapshot,
+    ) {
       final programs = snapshot.docs
           .map((doc) => DistributionProgram.fromFirestore(doc))
           .toList();
@@ -45,12 +49,12 @@ class DistributionService {
         .where('status', isEqualTo: 'active')
         .snapshots()
         .map((snapshot) {
-      final programs = snapshot.docs
-          .map((doc) => DistributionProgram.fromFirestore(doc))
-          .toList();
-      programs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return programs;
-    });
+          final programs = snapshot.docs
+              .map((doc) => DistributionProgram.fromFirestore(doc))
+              .toList();
+          programs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return programs;
+        });
   }
 
   /// Get program by ID
@@ -65,7 +69,12 @@ class DistributionService {
       }
       return null;
     } catch (e, stackTrace) {
-      Logger.error('Error getting program', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error getting program',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       return null;
     }
   }
@@ -73,14 +82,19 @@ class DistributionService {
   /// Update program status
   Future<bool> updateProgramStatus(String programId, String status) async {
     try {
-      await _firestore.collection('distribution_programs').doc(programId).update({
-        'status': status,
-        'updatedAt': Timestamp.now(),
-      });
+      await _firestore
+          .collection('distribution_programs')
+          .doc(programId)
+          .update({'status': status, 'updatedAt': Timestamp.now()});
       Fluttertoast.showToast(msg: 'Program status updated');
       return true;
     } catch (e, stackTrace) {
-      Logger.error('Error updating program status', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error updating program status',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       Fluttertoast.showToast(msg: 'Failed to update status');
       return false;
     }
@@ -115,7 +129,12 @@ class DistributionService {
 
       return eligible;
     } catch (e, stackTrace) {
-      Logger.error('Error getting eligible beneficiaries', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error getting eligible beneficiaries',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       return [];
     }
   }
@@ -123,7 +142,10 @@ class DistributionService {
   // ==================== DISTRIBUTION OPERATIONS ====================
 
   /// Check if beneficiary already received from this program
-  Future<bool> hasAlreadyReceived(String programId, String beneficiaryId) async {
+  Future<bool> hasAlreadyReceived(
+    String programId,
+    String beneficiaryId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('distribution_records')
@@ -133,7 +155,12 @@ class DistributionService {
           .get();
       return snapshot.docs.isNotEmpty;
     } catch (e, stackTrace) {
-      Logger.error('Error checking distribution', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error checking distribution',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       return false; // Allow distribution on error (fail open)
     }
   }
@@ -177,7 +204,12 @@ class DistributionService {
       Fluttertoast.showToast(msg: 'Distribution recorded successfully');
       return docRef.id;
     } catch (e, stackTrace) {
-      Logger.error('Error recording distribution', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error recording distribution',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       Fluttertoast.showToast(msg: 'Failed to record distribution');
       return null;
     }
@@ -190,13 +222,13 @@ class DistributionService {
         .where('programId', isEqualTo: programId)
         .snapshots()
         .map((snapshot) {
-      final records = snapshot.docs
-          .map((doc) => DistributionRecord.fromFirestore(doc))
-          .toList();
-      // Sort in memory to avoid needing composite index
-      records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
-      return records;
-    });
+          final records = snapshot.docs
+              .map((doc) => DistributionRecord.fromFirestore(doc))
+              .toList();
+          // Sort in memory to avoid needing composite index
+          records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
+          return records;
+        });
   }
 
   /// Get all distributions for a beneficiary (sorted in memory)
@@ -208,20 +240,19 @@ class DistributionService {
         .where('beneficiaryId', isEqualTo: beneficiaryId)
         .snapshots()
         .map((snapshot) {
-      final records = snapshot.docs
-          .map((doc) => DistributionRecord.fromFirestore(doc))
-          .toList();
-      records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
-      return records;
-    });
+          final records = snapshot.docs
+              .map((doc) => DistributionRecord.fromFirestore(doc))
+              .toList();
+          records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
+          return records;
+        });
   }
 
   /// Get recent distributions (for dashboard)
   Stream<List<DistributionRecord>> getRecentDistributions({int limit = 10}) {
-    return _firestore
-        .collection('distribution_records')
-        .snapshots()
-        .map((snapshot) {
+    return _firestore.collection('distribution_records').snapshots().map((
+      snapshot,
+    ) {
       final records = snapshot.docs
           .map((doc) => DistributionRecord.fromFirestore(doc))
           .toList();
@@ -237,12 +268,12 @@ class DistributionService {
         .where('distributedBy', isEqualTo: staffUid)
         .snapshots()
         .map((snapshot) {
-      final records = snapshot.docs
-          .map((doc) => DistributionRecord.fromFirestore(doc))
-          .toList();
-      records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
-      return records;
-    });
+          final records = snapshot.docs
+              .map((doc) => DistributionRecord.fromFirestore(doc))
+              .toList();
+          records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
+          return records;
+        });
   }
 
   // ==================== STATISTICS ====================
@@ -266,7 +297,7 @@ class DistributionService {
           .where((doc) => doc.data()['status'] == 'active')
           .length;
       int totalDistributions = recordsSnapshot.docs.length;
-      
+
       Set<String> uniqueBeneficiaries = {};
 
       for (var doc in recordsSnapshot.docs) {
@@ -289,7 +320,12 @@ class DistributionService {
         'byAidType': byAidType,
       };
     } catch (e, stackTrace) {
-      Logger.error('Error getting distribution stats', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error getting distribution stats',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       return {
         'totalPrograms': 0,
         'activePrograms': 0,
@@ -314,7 +350,12 @@ class DistributionService {
       records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
       return records;
     } catch (e, stackTrace) {
-      Logger.error('Error getting distributions for export', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error getting distributions for export',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       return [];
     }
   }
@@ -334,9 +375,13 @@ class DistributionService {
       records.sort((a, b) => b.distributedAt.compareTo(a.distributedAt));
       return records;
     } catch (e, stackTrace) {
-      Logger.error('Error getting program distributions for export', error: e, stackTrace: stackTrace, tag: 'DistributionService');
+      Logger.error(
+        'Error getting program distributions for export',
+        error: e,
+        stackTrace: stackTrace,
+        tag: 'DistributionService',
+      );
       return [];
     }
   }
 }
-

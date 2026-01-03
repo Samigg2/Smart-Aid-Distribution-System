@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/beneficiary_model.dart';
 import '../../models/beneficiary_registration_data.dart';
@@ -21,15 +22,20 @@ class Step2CategoryDetailsScreen extends ConsumerStatefulWidget {
 
 class _Step2CategoryDetailsScreenState extends ConsumerState<Step2CategoryDetailsScreen> {
   final List<TextEditingController> _childrenAgeControllers = [];
+  late TextEditingController _childrenCountController;
 
   @override
   void initState() {
     super.initState();
+    _childrenCountController = TextEditingController(
+      text: widget.data.childrenUnder5Count.toString(),
+    );
     _updateChildrenAgeControllers();
   }
 
   @override
   void dispose() {
+    _childrenCountController.dispose();
     for (var controller in _childrenAgeControllers) {
       controller.dispose();
     }
@@ -203,14 +209,23 @@ class _Step2CategoryDetailsScreenState extends ConsumerState<Step2CategoryDetail
             ),
             const SizedBox(height: 12),
             _buildTextField(
-              controller: TextEditingController(text: widget.data.childrenUnder5Count.toString()),
+              controller: _childrenCountController,
               label: 'Number of Children Under 5',
               icon: Icons.child_friendly,
               keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(2),
+              ],
               onChanged: (value) {
                 final count = int.tryParse(value) ?? 0;
-                setState(() => widget.data.childrenUnder5Count = count.clamp(0, 10));
-                _updateChildrenAgeControllers();
+                final clampedCount = count.clamp(0, 10);
+                if (widget.data.childrenUnder5Count != clampedCount) {
+                  setState(() {
+                    widget.data.childrenUnder5Count = clampedCount;
+                    _updateChildrenAgeControllers();
+                  });
+                }
               },
             ),
             if (widget.data.childrenUnder5Count > 0) ...[
@@ -417,11 +432,13 @@ class _Step2CategoryDetailsScreenState extends ConsumerState<Step2CategoryDetail
     required IconData icon,
     TextInputType? keyboardType,
     void Function(String)? onChanged,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       onChanged: onChanged,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),

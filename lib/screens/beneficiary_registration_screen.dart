@@ -146,9 +146,9 @@ class _BeneficiaryRegistrationScreenState
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error capturing photo: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error capturing photo: $e')));
     }
   }
 
@@ -167,7 +167,9 @@ class _BeneficiaryRegistrationScreenState
 
       if (permission == LocationPermission.deniedForever) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission permanently denied')),
+          const SnackBar(
+            content: Text('Location permission permanently denied'),
+          ),
         );
         return;
       }
@@ -189,9 +191,9 @@ class _BeneficiaryRegistrationScreenState
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting location: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
     }
   }
 
@@ -205,7 +207,9 @@ class _BeneficiaryRegistrationScreenState
 
     if (_selectedCategories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one vulnerable category')),
+        const SnackBar(
+          content: Text('Please select at least one vulnerable category'),
+        ),
       );
       return;
     }
@@ -267,12 +271,20 @@ class _BeneficiaryRegistrationScreenState
         childrenAges: childrenAges,
         isLivingAlone: _isLivingAlone,
         hasCaregiver: _hasCaregiver,
-        mobilityLevel: _selectedCategories.contains('elderly') ? _mobilityLevel : null,
-        disabilityType: _selectedCategories.contains('disabled') ? _disabilityType : null,
-        disabilitySeverity: _selectedCategories.contains('disabled') ? _disabilitySeverity : null,
+        mobilityLevel: _selectedCategories.contains('elderly')
+            ? _mobilityLevel
+            : null,
+        disabilityType: _selectedCategories.contains('disabled')
+            ? _disabilityType
+            : null,
+        disabilitySeverity: _selectedCategories.contains('disabled')
+            ? _disabilitySeverity
+            : null,
         usesAssistiveDevice: _usesAssistiveDevice,
         needsPersonalAssistance: _needsPersonalAssistance,
-        chronicIllnessType: _selectedCategories.contains('chronically_ill') ? _chronicIllnessType : null,
+        chronicIllnessType: _selectedCategories.contains('chronically_ill')
+            ? _chronicIllnessType
+            : null,
         isOnMedication: _isOnMedication,
         needsRegularMedicalCare: _needsRegularMedicalCare,
         totalFamilySize: int.tryParse(_familySizeController.text) ?? 1,
@@ -280,8 +292,12 @@ class _BeneficiaryRegistrationScreenState
         incomeLevel: _incomeLevel,
         currentlyReceivingOtherAid: _currentlyReceivingOtherAid,
         region: _region,
-        zone: _zoneController.text.trim().isEmpty ? null : _zoneController.text.trim(),
-        woreda: _woredaController.text.trim().isEmpty ? null : _woredaController.text.trim(),
+        zone: _zoneController.text.trim().isEmpty
+            ? null
+            : _zoneController.text.trim(),
+        woreda: _woredaController.text.trim().isEmpty
+            ? null
+            : _woredaController.text.trim(),
         latitude: _latitude,
         longitude: _longitude,
         photoUrl: _photoUrl,
@@ -292,18 +308,22 @@ class _BeneficiaryRegistrationScreenState
 
       // Save to Firestore
       final beneficiaryService = ref.read(beneficiaryServiceProvider);
-      final beneficiaryId = await beneficiaryService.createBeneficiary(beneficiary);
+      final beneficiaryId = await beneficiaryService.createBeneficiary(
+        beneficiary,
+      );
 
       if (beneficiaryId != null && mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const BeneficiaryListScreen()),
+          MaterialPageRoute(
+            builder: (context) => const BeneficiaryListScreen(),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -338,14 +358,16 @@ class _BeneficiaryRegistrationScreenState
                       controller: _fullNameController,
                       label: 'Full Name *',
                       icon: Icons.badge,
-                      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                      validator: (value) =>
+                          value?.isEmpty ?? true ? 'Required' : null,
                     ),
                     const SizedBox(height: 12),
                     _buildTextField(
                       controller: _nationalIdController,
                       label: 'National ID Number *',
                       icon: Icons.credit_card,
-                      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                      validator: (value) =>
+                          value?.isEmpty ?? true ? 'Required' : null,
                     ),
                     const SizedBox(height: 12),
                     _buildTextField(
@@ -371,10 +393,17 @@ class _BeneficiaryRegistrationScreenState
                             value: _gender,
                             label: 'Gender *',
                             items: const [
-                              DropdownMenuItem(value: 'female', child: Text('Female')),
-                              DropdownMenuItem(value: 'male', child: Text('Male')),
+                              DropdownMenuItem(
+                                value: 'female',
+                                child: Text('Female'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'male',
+                                child: Text('Male'),
+                              ),
                             ],
-                            onChanged: (value) => setState(() => _gender = value!),
+                            onChanged: (value) =>
+                                setState(() => _gender = value!),
                           ),
                         ),
                       ],
@@ -382,7 +411,10 @@ class _BeneficiaryRegistrationScreenState
                     const SizedBox(height: 24),
 
                     // Section 2: Vulnerable Categories (Multi-select)
-                    _buildSectionHeader('Vulnerable Category *', Icons.warning_amber),
+                    _buildSectionHeader(
+                      'Vulnerable Category *',
+                      Icons.warning_amber,
+                    ),
                     const Text(
                       'Select all that apply:',
                       style: TextStyle(color: Colors.grey, fontSize: 14),
@@ -414,28 +446,35 @@ class _BeneficiaryRegistrationScreenState
                       label: 'Total Family Size *',
                       icon: Icons.people,
                       keyboardType: TextInputType.number,
-                      validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                      validator: (value) =>
+                          value?.isEmpty ?? true ? 'Required' : null,
                     ),
                     const SizedBox(height: 12),
                     SwitchListTile(
                       title: const Text('Is Female-Headed Household?'),
                       value: _isFemaleHeadedHousehold,
-                      onChanged: (value) => setState(() => _isFemaleHeadedHousehold = value),
+                      onChanged: (value) =>
+                          setState(() => _isFemaleHeadedHousehold = value),
                     ),
                     const SizedBox(height: 12),
                     _buildDropdown<String>(
                       value: _incomeLevel,
                       label: 'Monthly Family Income *',
                       items: IncomeLevel.values.map((level) {
-                        return DropdownMenuItem(value: level.value, child: Text(level.label));
+                        return DropdownMenuItem(
+                          value: level.value,
+                          child: Text(level.label),
+                        );
                       }).toList(),
-                      onChanged: (value) => setState(() => _incomeLevel = value!),
+                      onChanged: (value) =>
+                          setState(() => _incomeLevel = value!),
                     ),
                     const SizedBox(height: 12),
                     SwitchListTile(
                       title: const Text('Currently Receiving Other Aid?'),
                       value: _currentlyReceivingOtherAid,
-                      onChanged: (value) => setState(() => _currentlyReceivingOtherAid = value),
+                      onChanged: (value) =>
+                          setState(() => _currentlyReceivingOtherAid = value),
                     ),
                     const SizedBox(height: 24),
 
@@ -445,7 +484,10 @@ class _BeneficiaryRegistrationScreenState
                       value: _region,
                       label: 'Region *',
                       items: _regions.map((region) {
-                        return DropdownMenuItem(value: region, child: Text(region));
+                        return DropdownMenuItem(
+                          value: region,
+                          child: Text(region),
+                        );
                       }).toList(),
                       onChanged: (value) => setState(() => _region = value!),
                     ),
@@ -510,9 +552,16 @@ class _BeneficiaryRegistrationScreenState
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.camera_alt, size: 48, color: Colors.grey),
+                              Icon(
+                                Icons.camera_alt,
+                                size: 48,
+                                color: Colors.grey,
+                              ),
                               SizedBox(height: 8),
-                              Text('No photo captured', style: TextStyle(color: Colors.grey)),
+                              Text(
+                                'No photo captured',
+                                style: TextStyle(color: Colors.grey),
+                              ),
                             ],
                           ),
                         ),
@@ -521,7 +570,9 @@ class _BeneficiaryRegistrationScreenState
                     ElevatedButton.icon(
                       onPressed: _capturePhoto,
                       icon: const Icon(Icons.camera),
-                      label: Text(_photoFile == null ? 'Capture Photo' : 'Retake Photo'),
+                      label: Text(
+                        _photoFile == null ? 'Capture Photo' : 'Retake Photo',
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[700],
                         foregroundColor: Colors.white,
@@ -559,7 +610,10 @@ class _BeneficiaryRegistrationScreenState
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Register Beneficiary',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -612,15 +666,30 @@ class _BeneficiaryRegistrationScreenState
       case VulnerableCategory.pregnantWoman:
         return const Text('Currently pregnant', style: TextStyle(fontSize: 12));
       case VulnerableCategory.lactatingMother:
-        return const Text('Breastfeeding mother', style: TextStyle(fontSize: 12));
+        return const Text(
+          'Breastfeeding mother',
+          style: TextStyle(fontSize: 12),
+        );
       case VulnerableCategory.childUnder5:
-        return const Text('Has children under 5 years', style: TextStyle(fontSize: 12));
+        return const Text(
+          'Has children under 5 years',
+          style: TextStyle(fontSize: 12),
+        );
       case VulnerableCategory.elderly:
-        return const Text('Age 60 years or older', style: TextStyle(fontSize: 12));
+        return const Text(
+          'Age 60 years or older',
+          style: TextStyle(fontSize: 12),
+        );
       case VulnerableCategory.disabled:
-        return const Text('Physical, visual, hearing, or intellectual disability', style: TextStyle(fontSize: 12));
+        return const Text(
+          'Physical, visual, hearing, or intellectual disability',
+          style: TextStyle(fontSize: 12),
+        );
       case VulnerableCategory.chronicallyIll:
-        return const Text('HIV/AIDS, TB, diabetes, heart disease, etc.', style: TextStyle(fontSize: 12));
+        return const Text(
+          'HIV/AIDS, TB, diabetes, heart disease, etc.',
+          style: TextStyle(fontSize: 12),
+        );
     }
   }
 
@@ -637,14 +706,25 @@ class _BeneficiaryRegistrationScreenState
               children: [
                 Icon(Icons.pregnant_woman, color: Colors.pink[700]),
                 const SizedBox(width: 8),
-                Text('Pregnancy Details', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pink[700])),
+                Text(
+                  'Pregnancy Details',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink[700],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
             _buildDropdown<int>(
               value: _pregnancyTrimester,
               label: 'Pregnancy Trimester *',
-              items: [1, 2, 3].map((t) => DropdownMenuItem(value: t, child: Text('Trimester $t'))).toList(),
+              items: [1, 2, 3]
+                  .map(
+                    (t) =>
+                        DropdownMenuItem(value: t, child: Text('Trimester $t')),
+                  )
+                  .toList(),
               onChanged: (value) => setState(() => _pregnancyTrimester = value),
             ),
           ],
@@ -666,12 +746,20 @@ class _BeneficiaryRegistrationScreenState
               children: [
                 Icon(Icons.child_care, color: Colors.orange[700]),
                 const SizedBox(width: 8),
-                Text('Children Under 5', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange[700])),
+                Text(
+                  'Children Under 5',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange[700],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
             _buildTextField(
-              controller: TextEditingController(text: _childrenUnder5Count.toString()),
+              controller: TextEditingController(
+                text: _childrenUnder5Count.toString(),
+              ),
               label: 'Number of Children Under 5',
               icon: Icons.child_friendly,
               keyboardType: TextInputType.number,
@@ -683,7 +771,10 @@ class _BeneficiaryRegistrationScreenState
             ),
             if (_childrenUnder5Count > 0) ...[
               const SizedBox(height: 12),
-              const Text('Enter each child\'s age in months:', style: TextStyle(fontSize: 12)),
+              const Text(
+                'Enter each child\'s age in months:',
+                style: TextStyle(fontSize: 12),
+              ),
               const SizedBox(height: 8),
               ...List.generate(_childrenUnder5Count, (index) {
                 return Padding(
@@ -716,7 +807,13 @@ class _BeneficiaryRegistrationScreenState
               children: [
                 Icon(Icons.elderly, color: Colors.purple[700]),
                 const SizedBox(width: 8),
-                Text('Elderly (60+) Details', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple[700])),
+                Text(
+                  'Elderly (60+) Details',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple[700],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -729,7 +826,9 @@ class _BeneficiaryRegistrationScreenState
             ),
             SwitchListTile(
               title: const Text('Has Caregiver?'),
-              subtitle: const Text('Someone regularly helps with daily activities'),
+              subtitle: const Text(
+                'Someone regularly helps with daily activities',
+              ),
               value: _hasCaregiver,
               onChanged: (value) => setState(() => _hasCaregiver = value),
               dense: true,
@@ -762,7 +861,13 @@ class _BeneficiaryRegistrationScreenState
               children: [
                 Icon(Icons.accessible, color: Colors.teal[700]),
                 const SizedBox(width: 8),
-                Text('Disability Details', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.teal[700])),
+                Text(
+                  'Disability Details',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal[700],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -781,21 +886,24 @@ class _BeneficiaryRegistrationScreenState
               items: DisabilitySeverity.values.map((d) {
                 return DropdownMenuItem(value: d.value, child: Text(d.label));
               }).toList(),
-              onChanged: (value) => setState(() => _disabilitySeverity = value!),
+              onChanged: (value) =>
+                  setState(() => _disabilitySeverity = value!),
             ),
             const SizedBox(height: 12),
             SwitchListTile(
               title: const Text('Uses Assistive Device?'),
               subtitle: const Text('Wheelchair, crutches, hearing aid, etc.'),
               value: _usesAssistiveDevice,
-              onChanged: (value) => setState(() => _usesAssistiveDevice = value),
+              onChanged: (value) =>
+                  setState(() => _usesAssistiveDevice = value),
               dense: true,
             ),
             SwitchListTile(
               title: const Text('Needs Personal Assistance?'),
               subtitle: const Text('Requires help with daily activities'),
               value: _needsPersonalAssistance,
-              onChanged: (value) => setState(() => _needsPersonalAssistance = value),
+              onChanged: (value) =>
+                  setState(() => _needsPersonalAssistance = value),
               dense: true,
             ),
           ],
@@ -817,7 +925,13 @@ class _BeneficiaryRegistrationScreenState
               children: [
                 Icon(Icons.medical_services, color: Colors.red[700]),
                 const SizedBox(width: 8),
-                Text('Chronic Illness Details', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red[700])),
+                Text(
+                  'Chronic Illness Details',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red[700],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -827,7 +941,8 @@ class _BeneficiaryRegistrationScreenState
               items: ChronicIllnessType.values.map((c) {
                 return DropdownMenuItem(value: c.value, child: Text(c.label));
               }).toList(),
-              onChanged: (value) => setState(() => _chronicIllnessType = value!),
+              onChanged: (value) =>
+                  setState(() => _chronicIllnessType = value!),
             ),
             const SizedBox(height: 12),
             SwitchListTile(
@@ -841,7 +956,8 @@ class _BeneficiaryRegistrationScreenState
               title: const Text('Needs Regular Medical Care?'),
               subtitle: const Text('Requires frequent hospital/clinic visits'),
               value: _needsRegularMedicalCare,
-              onChanged: (value) => setState(() => _needsRegularMedicalCare = value),
+              onChanged: (value) =>
+                  setState(() => _needsRegularMedicalCare = value),
               dense: true,
             ),
           ],
@@ -859,7 +975,11 @@ class _BeneficiaryRegistrationScreenState
           const SizedBox(width: 8),
           Text(
             title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
           ),
         ],
       ),

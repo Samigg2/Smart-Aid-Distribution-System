@@ -81,9 +81,9 @@ class BeneficiaryValidator {
       return 'Lactating mother category requires age less than 60';
     }
 
-    if (newCategory == 'child_under_5' && age != null && age >= 5) {
-      return 'Child under 5 category requires age less than 5';
-    }
+    // Note: child_under_5 means "has children under 5", not "is a child under 5"
+    // So we don't validate age for this category - adults can have children under 5
+    // The validation is removed to allow adults to select this category
 
     return null; // No conflict
   }
