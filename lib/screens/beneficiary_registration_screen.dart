@@ -8,10 +8,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../models/beneficiary_model.dart';
 import '../providers/beneficiary_provider.dart';
-import 'beneficiary_list_screen.dart';
+import '../utils/beneficiary_validator.dart';
 
 class BeneficiaryRegistrationScreen extends ConsumerStatefulWidget {
-  const BeneficiaryRegistrationScreen({super.key});
+  final BeneficiaryModel? beneficiary;
+  const BeneficiaryRegistrationScreen({super.key, this.beneficiary});
 
   @override
   ConsumerState<BeneficiaryRegistrationScreen> createState() =>
@@ -74,6 +75,7 @@ class _BeneficiaryRegistrationScreenState
   // Section 5: Photo (OPTIONAL)
   File? _photoFile;
   String? _photoUrl;
+  String? _existingPhotoUrl;
 
   // Ethiopian regions
   final List<String> _regions = [
@@ -91,6 +93,55 @@ class _BeneficiaryRegistrationScreenState
     'South West Ethiopia',
     'Tigray',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.beneficiary != null) {
+      _populateFieldsFromBeneficiary(widget.beneficiary!);
+    }
+  }
+
+  void _populateFieldsFromBeneficiary(BeneficiaryModel beneficiary) {
+    _fullNameController.text = beneficiary.fullName;
+    _nationalIdController.text = beneficiary.nationalId;
+    _phoneController.text = beneficiary.phoneNumber ?? '';
+    _ageController.text = beneficiary.age?.toString() ?? '';
+    _gender = beneficiary.gender;
+    _selectedCategories.addAll(beneficiary.vulnerableCategories);
+    _isPregnant = beneficiary.isPregnant;
+    _pregnancyTrimester = beneficiary.pregnancyTrimester;
+    _childrenUnder5Count = beneficiary.childrenUnder5Count;
+    _isLivingAlone = beneficiary.isLivingAlone;
+    _hasCaregiver = beneficiary.hasCaregiver;
+    _mobilityLevel = beneficiary.mobilityLevel ?? 'can_walk';
+    _disabilityType = beneficiary.disabilityType ?? 'physical';
+    _disabilitySeverity = beneficiary.disabilitySeverity ?? 'moderate';
+    _usesAssistiveDevice = beneficiary.usesAssistiveDevice;
+    _needsPersonalAssistance = beneficiary.needsPersonalAssistance;
+    _chronicIllnessType = beneficiary.chronicIllnessType ?? 'other';
+    _isOnMedication = beneficiary.isOnMedication;
+    _needsRegularMedicalCare = beneficiary.needsRegularMedicalCare;
+    _familySizeController.text = beneficiary.totalFamilySize.toString();
+    _isFemaleHeadedHousehold = beneficiary.isFemaleHeadedHousehold;
+    _incomeLevel = beneficiary.incomeLevel;
+    _currentlyReceivingOtherAid = beneficiary.currentlyReceivingOtherAid;
+    _region = beneficiary.region;
+    _zoneController.text = beneficiary.zone ?? '';
+    _woredaController.text = beneficiary.woreda ?? '';
+    _latitude = beneficiary.latitude;
+    _longitude = beneficiary.longitude;
+    _existingPhotoUrl = beneficiary.photoUrl;
+    _photoUrl = beneficiary.photoUrl;
+    if (beneficiary.childrenAges.isNotEmpty) {
+      for (var i = 0; i < beneficiary.childrenAges.length; i++) {
+        if (i < _childrenAgeControllers.length) {
+          _childrenAgeControllers[i].text = beneficiary.childrenAges[i].toString();
+        }
+      }
+    }
+    _updateChildrenAgeControllers();
+  }
 
   @override
   void dispose() {
@@ -214,6 +265,21 @@ class _BeneficiaryRegistrationScreenState
       return;
     }
 
+    final age = int.tryParse(_ageController.text);
+    final categoryErrors = BeneficiaryValidator.validateAllCategories(
+      _selectedCategories,
+      age,
+    );
+    if (categoryErrors.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(categoryErrors.first),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -226,6 +292,8 @@ class _BeneficiaryRegistrationScreenState
       if (_photoFile != null) {
         final cloudinaryService = ref.read(cloudinaryServiceProvider);
         _photoUrl = await cloudinaryService.uploadBeneficiaryPhoto(_photoFile!);
+      } else if (widget.beneficiary != null && _existingPhotoUrl != null) {
+        _photoUrl = _existingPhotoUrl;
       }
 
       // Collect children ages
@@ -306,18 +374,24 @@ class _BeneficiaryRegistrationScreenState
         urgencyScore: urgencyScore,
       );
 
-      // Save to Firestore
+      // Save or update to Firestore
       final beneficiaryService = ref.read(beneficiaryServiceProvider);
-      final beneficiaryId = await beneficiaryService.createBeneficiary(
-        beneficiary,
-      );
-
-      if (beneficiaryId != null && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const BeneficiaryListScreen(),
-          ),
+      bool success = false;
+      
+      if (widget.beneficiary != null) {
+        success = await beneficiaryService.updateBeneficiary(
+          widget.beneficiary!.beneficiaryId,
+          beneficiary,
         );
+      } else {
+        final beneficiaryId = await beneficiaryService.createBeneficiary(
+          beneficiary,
+        );
+        success = beneficiaryId != null;
+      }
+
+      if (success && mounted) {
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
@@ -337,7 +411,7 @@ class _BeneficiaryRegistrationScreenState
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Register Beneficiary'),
+        title: Text(widget.beneficiary != null ? 'Edit Beneficiary' : 'Register Beneficiary'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
       ),
@@ -608,9 +682,9 @@ class _BeneficiaryRegistrationScreenState
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Register Beneficiary',
-                          style: TextStyle(
+                      : Text(
+                          widget.beneficiary != null ? 'Update Beneficiary' : 'Register Beneficiary',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -636,21 +710,37 @@ class _BeneficiaryRegistrationScreenState
               subtitle: _getCategoryDescription(category),
               value: _selectedCategories.contains(category.value),
               onChanged: (bool? value) {
-                setState(() {
-                  if (value == true) {
+                if (value == true) {
+                  final age = int.tryParse(_ageController.text);
+                  final conflictError = BeneficiaryValidator.validateCategorySelection(
+                    category.value,
+                    _selectedCategories,
+                    age,
+                  );
+                  if (conflictError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(conflictError),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+                  setState(() {
                     _selectedCategories.add(category.value);
-                    // Auto-set pregnant flag
                     if (category == VulnerableCategory.pregnantWoman) {
                       _isPregnant = true;
                     }
-                  } else {
+                  });
+                } else {
+                  setState(() {
                     _selectedCategories.remove(category.value);
                     if (category == VulnerableCategory.pregnantWoman) {
                       _isPregnant = false;
                       _pregnancyTrimester = null;
                     }
-                  }
-                });
+                  });
+                }
               },
               activeColor: Colors.blue[700],
               dense: true,

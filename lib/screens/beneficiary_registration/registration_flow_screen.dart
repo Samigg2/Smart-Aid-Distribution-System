@@ -27,7 +27,7 @@ class _RegistrationFlowScreenState
   }
 
   void _nextStep() {
-    if (_currentStep < 2) {
+    if (_currentStep < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -64,6 +64,7 @@ class _RegistrationFlowScreenState
                 _buildStepIndicator(0, 'Personal Info'),
                 _buildStepIndicator(1, 'Category Details'),
                 _buildStepIndicator(2, 'Family & Location'),
+                _buildStepIndicator(3, 'Finish'),
               ],
             ),
           ),
@@ -91,6 +92,8 @@ class _RegistrationFlowScreenState
   Widget _buildStepIndicator(int step, String label) {
     final isActive = _currentStep == step;
     final isCompleted = _currentStep > step;
+    final isLastStep = step == 3;
+
     return Expanded(
       child: Column(
         children: [
@@ -106,7 +109,19 @@ class _RegistrationFlowScreenState
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: isCompleted
+                  child: isLastStep
+                      ? (isCompleted
+                            ? const Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 18,
+                              )
+                            : const Icon(
+                                Icons.check,
+                                color: Colors.white54,
+                                size: 18,
+                              ))
+                      : isCompleted
                       ? const Icon(Icons.check, color: Colors.white, size: 18)
                       : Text(
                           '${step + 1}',
@@ -119,12 +134,13 @@ class _RegistrationFlowScreenState
                         ),
                 ),
               ),
-              Expanded(
-                child: Container(
-                  height: 2,
-                  color: isCompleted ? Colors.blue[700] : Colors.grey[300],
+              if (!isLastStep)
+                Expanded(
+                  child: Container(
+                    height: 2,
+                    color: isCompleted ? Colors.blue[700] : Colors.grey[300],
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -137,6 +153,7 @@ class _RegistrationFlowScreenState
                   : Colors.grey[600],
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

@@ -138,39 +138,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 // App Logo
                                 Hero(
                                   tag: 'app_logo',
-                                  child: Container(
-                                    width: 90,
-                                    height: 90,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.blue[700]!,
-                                          Colors.cyan[400]!,
-                                        ],
-                                      ),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.blue.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                          blurRadius: 20,
-                                          offset: const Offset(0, 5),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.volunteer_activism,
-                                      size: 45,
-                                      color: Colors.white,
-                                    ),
+                                  child: Image.asset(
+                                    'assets/icon/smartaidicon.png',
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit.contain,
                                   ),
                                 ),
                                 const SizedBox(height: 24),
 
                                 // Title
                                 Text(
-                                  'Welcome Back!',
+                                  'Welcome!',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 28,
@@ -178,7 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     color: Colors.grey[800],
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 6),
                                 Text(
                                   'Smart Aid Distribution System',
                                   textAlign: TextAlign.center,
@@ -188,7 +167,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                const SizedBox(height: 32),
+                                const SizedBox(height: 26),
 
                                 // Email Field
                                 TextFormField(
@@ -319,25 +298,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                             _rememberMe = !_rememberMe;
                                           });
                                         },
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Remember Me (Offline Access)',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                color: Colors.grey[800],
-                                              ),
-                                            ),
-                                            Text(
-                                              'Enable offline login for remote areas',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
+                                        child: Text(
+                                          'Remember Me',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.grey[800],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -406,7 +373,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 ),
                                 const SizedBox(height: 28),
 
-                                // Info Text
+                                /*   // Info Text
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
@@ -433,7 +400,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       ),
                                     ],
                                   ),
-                                ),
+                                ),*/
                               ],
                             ),
                           ),

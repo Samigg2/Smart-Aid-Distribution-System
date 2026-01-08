@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/beneficiary_model.dart';
 import '../providers/beneficiary_provider.dart';
 import '../widgets/qr_code_widget.dart';
+import 'beneficiary_registration_screen.dart';
 
 class BeneficiaryDetailScreen extends ConsumerWidget {
   final String beneficiaryId;
@@ -20,6 +21,28 @@ class BeneficiaryDetailScreen extends ConsumerWidget {
         title: const Text('Beneficiary Details'),
         backgroundColor: Colors.blue[700],
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              final beneficiary = beneficiaryAsync.value;
+              if (beneficiary != null) {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BeneficiaryRegistrationScreen(
+                      beneficiary: beneficiary,
+                    ),
+                  ),
+                );
+                if (result == true) {
+                  ref.invalidate(beneficiaryByIdProvider(beneficiaryId));
+                }
+              }
+            },
+            tooltip: 'Edit Beneficiary',
+          ),
+        ],
       ),
       body: beneficiaryAsync.when(
         data: (beneficiary) {
