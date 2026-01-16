@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../models/beneficiary_model.dart';
 import '../models/distribution_model.dart';
 import '../utils/logger.dart';
+import 'export_web_helper_stub.dart'
+    if (dart.library.html) 'export_web_helper.dart';
 
 class ExportService {
   /// Export beneficiaries to CSV file
@@ -212,6 +215,11 @@ class ExportService {
 
   /// Save content to file and return path
   Future<String> _saveToFile(String fileName, String content) async {
+    if (kIsWeb) {
+      // On web we cannot write to a local filesystem path; trigger a download instead.
+      return ExportWebHelper.saveCsv(fileName, content);
+    }
+
     Directory exportDir;
     
     try {

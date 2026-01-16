@@ -70,21 +70,26 @@ class _RegistrationFlowScreenState
           ),
         ),
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          Step1PersonalInfoScreen(data: _registrationData, onNext: _nextStep),
-          Step2CategoryDetailsScreen(
-            data: _registrationData,
-            onNext: _nextStep,
-            onBack: _previousStep,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              Step1PersonalInfoScreen(data: _registrationData, onNext: _nextStep),
+              Step2CategoryDetailsScreen(
+                data: _registrationData,
+                onNext: _nextStep,
+                onBack: _previousStep,
+              ),
+              Step3FamilyLocationScreen(
+                data: _registrationData,
+                onBack: _previousStep,
+              ),
+            ],
           ),
-          Step3FamilyLocationScreen(
-            data: _registrationData,
-            onBack: _previousStep,
-          ),
-        ],
+        ),
       ),
     );
   }

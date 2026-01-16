@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
@@ -65,6 +66,17 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
 
   Future<void> _capturePhoto() async {
     try {
+      if (kIsWeb) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Photo capture is not supported in the web version. Please use the mobile app for photos.',
+            ),
+          ),
+        );
+        return;
+      }
+
       final ImagePicker picker = ImagePicker();
       final XFile? photo = await picker.pickImage(
         source: ImageSource.camera,

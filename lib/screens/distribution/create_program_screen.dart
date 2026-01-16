@@ -149,11 +149,14 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Program Info Card
               _buildSectionCard('Program Information', Icons.info, [
                 TextFormField(
@@ -398,7 +401,9 @@ class _CreateProgramScreenState extends ConsumerState<CreateProgramScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

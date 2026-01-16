@@ -84,9 +84,12 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Welcome Card
               Card(
                 elevation: 2,
@@ -269,7 +272,9 @@ class _StaffDashboardState extends ConsumerState<StaffDashboard> {
                   );
                 },
               ),
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

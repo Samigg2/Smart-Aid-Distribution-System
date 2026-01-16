@@ -59,9 +59,12 @@ class ReportsDashboardScreen extends ConsumerWidget {
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Summary Cards
               _buildSummarySection(
                 distributionStatsAsync,
@@ -85,6 +88,8 @@ class ReportsDashboardScreen extends ConsumerWidget {
               // Recent Activity
               _buildRecentActivity(recentDistributionsAsync),
             ],
+              ),
+            ),
           ),
         ),
       ),
@@ -104,14 +109,17 @@ class ReportsDashboardScreen extends ConsumerWidget {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.3,
-          children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = constraints.maxWidth > 600 ? 2 : 1;
+            return GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: crossAxisCount == 2 ? 1.3 : 2.0,
+              children: [
             _buildStatCard(
               'Total Beneficiaries',
               beneficiaryStats.when(
@@ -152,7 +160,9 @@ class ReportsDashboardScreen extends ConsumerWidget {
               Icons.check_circle,
               Colors.purple,
             ),
-          ],
+              ],
+            );
+          },
         ),
       ],
     );

@@ -94,9 +94,12 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Welcome Card
               Card(
                 elevation: 2,
@@ -167,14 +170,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
 
               // Statistics Cards Grid
               statisticsAsync.when(
-                data: (stats) => GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.6,
-                  children: [
+                data: (stats) => LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = constraints.maxWidth > 600 ? 2 : 1;
+                    return GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: crossAxisCount == 2 ? 1.6 : 2.5,
+                      children: [
                     _buildStatCard(
                       'Total Users',
                       stats['total'].toString(),
@@ -199,7 +205,9 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                       Icons.badge,
                       Colors.orange,
                     ),
-                  ],
+                      ],
+                    );
+                  },
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) =>
@@ -287,6 +295,8 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                 },
               ),
             ],
+              ),
+            ),
           ),
         ),
       ),
@@ -452,8 +462,17 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
                     prefixIcon: Icon(Icons.phone),
                   ),
                   keyboardType: TextInputType.phone,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Required' : null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Required';
+                    }
+                    final trimmed = value.trim();
+                    final regExp = RegExp(r'^09\d{8}$');
+                    if (!regExp.hasMatch(trimmed)) {
+                      return 'Phone must be 10 digits and start with 09 (e.g. 0912345678)';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(

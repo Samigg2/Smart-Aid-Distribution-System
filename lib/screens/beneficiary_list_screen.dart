@@ -58,93 +58,98 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
       body: Column(
         children: [
           // Search and Filters
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search by name or national ID...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                  ),
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
-                ),
-                const SizedBox(height: 12),
-                Row(
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _filterRegion,
-                        decoration: InputDecoration(
-                          labelText: 'Filter by Region',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search by name or national ID...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
                         ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: null,
-                            child: Text('All Regions'),
-                          ),
-                          ...[
-                            'Addis Ababa',
-                            'Oromia',
-                            'Amhara',
-                            'Tigray',
-                            'SNNPR',
-                          ].map(
-                            (region) => DropdownMenuItem(
-                              value: region,
-                              child: Text(region),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) =>
-                            setState(() => _filterRegion = value),
+                        filled: true,
+                        fillColor: Colors.grey[100],
                       ),
+                      onChanged: (value) {
+                        setState(() => _searchQuery = value.toLowerCase());
+                      },
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _filterType,
-                        decoration: InputDecoration(
-                          labelText: 'Filter by Type',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _filterRegion,
+                            decoration: InputDecoration(
+                              labelText: 'Filter by Region',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                            ),
+                            items: [
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('All Regions'),
+                              ),
+                              ...[
+                                'Addis Ababa',
+                                'Oromia',
+                                'Amhara',
+                                'Tigray',
+                                'SNNPR',
+                              ].map(
+                                (region) => DropdownMenuItem(
+                                  value: region,
+                                  child: Text(region),
+                                ),
+                              ),
+                            ],
+                            onChanged: (value) =>
+                                setState(() => _filterRegion = value),
                           ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
                         ),
-                        items: [
-                          const DropdownMenuItem(
-                            value: null,
-                            child: Text('All Types'),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _filterType,
+                            decoration: InputDecoration(
+                              labelText: 'Filter by Type',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                            ),
+                            items: [
+                              const DropdownMenuItem(
+                                value: null,
+                                child: Text('All Types'),
+                              ),
+                              ...VulnerableCategory.values.map((type) {
+                                return DropdownMenuItem(
+                                  value: type.value,
+                                  child: Text(type.label),
+                                );
+                              }),
+                            ],
+                            onChanged: (value) =>
+                                setState(() => _filterType = value),
                           ),
-                          ...VulnerableCategory.values.map((type) {
-                            return DropdownMenuItem(
-                              value: type.value,
-                              child: Text(type.label),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) =>
-                            setState(() => _filterType = value),
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
 
@@ -211,12 +216,17 @@ class _BeneficiaryListScreenState extends ConsumerState<BeneficiaryListScreen> {
                       );
                     }
                   },
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      return _buildBeneficiaryCard(filtered[index]);
-                    },
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 900),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16.0),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          return _buildBeneficiaryCard(filtered[index]);
+                        },
+                      ),
+                    ),
                   ),
                 );
               },

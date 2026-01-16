@@ -51,9 +51,12 @@ class BeneficiaryDetailScreen extends ConsumerWidget {
           }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 // Photo and Basic Info Card
                 _buildHeaderCard(beneficiary),
                 const SizedBox(height: 16),
@@ -151,6 +154,8 @@ class BeneficiaryDetailScreen extends ConsumerWidget {
                   fullName: beneficiary.fullName,
                 ),
               ],
+                ),
+              ),
             ),
           );
         },

@@ -25,32 +25,35 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search users...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: Column(
+            children: [
+              // Search Bar
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search users...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.toLowerCase());
+                  },
                 ),
-                filled: true,
-                fillColor: Colors.grey[100],
               ),
-              onChanged: (value) {
-                setState(() => _searchQuery = value.toLowerCase());
-              },
-            ),
-          ),
 
-          // Users List
-          Expanded(
-            child: Consumer(
+              // Users List
+              Expanded(
+                child: Consumer(
               builder: (context, ref, child) {
                 final usersAsync = ref.watch(allUsersProvider);
 
@@ -126,8 +129,10 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                 );
               },
             ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -331,8 +336,17 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                     prefixIcon: Icon(Icons.phone),
                   ),
                   keyboardType: TextInputType.phone,
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Required' : null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Required';
+                    }
+                    final trimmed = value.trim();
+                    final regExp = RegExp(r'^09\d{8}$');
+                    if (!regExp.hasMatch(trimmed)) {
+                      return 'Phone must be 10 digits and start with 09 (e.g. 0912345678)';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
