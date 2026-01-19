@@ -10,6 +10,8 @@ import 'package:path/path.dart' as path;
 import '../../models/beneficiary_model.dart';
 import '../../models/beneficiary_registration_data.dart';
 import '../../providers/beneficiary_provider.dart';
+import '../../providers/priority_model_ai_provider.dart';
+import '../../utils/logger.dart';
 import '../beneficiary_list_screen.dart';
 
 class Step3FamilyLocationScreen extends ConsumerStatefulWidget {
@@ -23,10 +25,12 @@ class Step3FamilyLocationScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<Step3FamilyLocationScreen> createState() => _Step3FamilyLocationScreenState();
+  ConsumerState<Step3FamilyLocationScreen> createState() =>
+      _Step3FamilyLocationScreenState();
 }
 
-class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationScreen> {
+class _Step3FamilyLocationScreenState
+    extends ConsumerState<Step3FamilyLocationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _familySizeController = TextEditingController();
   final _zoneController = TextEditingController();
@@ -103,9 +107,9 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error capturing photo: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error capturing photo: $e')));
     }
   }
 
@@ -124,7 +128,9 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
 
       if (permission == LocationPermission.deniedForever) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permission permanently denied')),
+          const SnackBar(
+            content: Text('Location permission permanently denied'),
+          ),
         );
         return;
       }
@@ -146,9 +152,9 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error getting location: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
     }
   }
 
@@ -163,10 +169,7 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
     final errors = widget.data.validateStep3();
     if (errors.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errors.first),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(errors.first), backgroundColor: Colors.red),
       );
       return;
     }
@@ -180,18 +183,25 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
       }
 
       // Update data from controllers
-      widget.data.totalFamilySize = int.tryParse(_familySizeController.text) ?? 1;
-      widget.data.zone = _zoneController.text.trim().isEmpty ? null : _zoneController.text.trim();
-      widget.data.woreda = _woredaController.text.trim().isEmpty ? null : _woredaController.text.trim();
+      widget.data.totalFamilySize =
+          int.tryParse(_familySizeController.text) ?? 1;
+      widget.data.zone = _zoneController.text.trim().isEmpty
+          ? null
+          : _zoneController.text.trim();
+      widget.data.woreda = _woredaController.text.trim().isEmpty
+          ? null
+          : _woredaController.text.trim();
 
       // Upload photo to Cloudinary if provided (OPTIONAL)
       if (widget.data.photoFile != null) {
         final cloudinaryService = ref.read(cloudinaryServiceProvider);
-        widget.data.photoUrl = await cloudinaryService.uploadBeneficiaryPhoto(widget.data.photoFile!);
+        widget.data.photoUrl = await cloudinaryService.uploadBeneficiaryPhoto(
+          widget.data.photoFile!,
+        );
       }
 
-      // Calculate urgency score
-      final urgencyScore = BeneficiaryModel.calculateUrgencyScore(
+      // Calculate rule-based urgency score (always works)
+      final double ruleUrgencyScore = BeneficiaryModel.calculateUrgencyScore(
         vulnerableCategories: widget.data.selectedCategories.toList(),
         isPregnant: widget.data.isPregnant,
         pregnancyTrimester: widget.data.pregnancyTrimester,
@@ -207,6 +217,66 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
         needsRegularMedicalCare: widget.data.needsRegularMedicalCare,
       );
 
+      // Optional AI scoring (safe fallback if API is not configured/reachable)
+      double finalUrgencyScore =
+          ruleUrgencyScore; // Default = rule-based (safe fallback)
+      String? aiPriorityLabel; // Store for display/logging
+      double? aiConfidence;
+
+      try {
+        final priorityModelAiService = ref.read(priorityModelAiServiceProvider);
+        final aiPrediction = await priorityModelAiService.predictPriority(
+          age: widget.data.age ?? 0,
+          gender: widget.data.gender,
+          income: widget.data.incomeLevel,
+          disability: widget.data.selectedCategories.contains('disabled')
+              ? 'Yes'
+              : 'No',
+          dependents: widget.data.childrenUnder5Count,
+          description:
+              '${widget.data.fullName ?? ''} ${widget.data.selectedCategories.join(", ")} ${widget.data.region}',
+        );
+
+        if (aiPrediction != null) {
+          // Convert AI priority string ("high"/"medium"/"low") to urgency score number
+          final double aiUrgencyScore = switch (aiPrediction.priority
+              .toLowerCase()) {
+            'high' => 0.85,
+            'low' => 0.20,
+            'medium' => 0.55,
+            _ => 0.55, // Default to medium if unexpected value
+          };
+
+          // Blend: 70% rule-based score + 30% AI score
+          finalUrgencyScore = (0.70 * ruleUrgencyScore + 0.30 * aiUrgencyScore)
+              .clamp(0.0, 1.0);
+
+          // Store for potential display/logging
+          aiPriorityLabel = aiPrediction.priority
+              .toUpperCase(); // "HIGH", "MEDIUM", "LOW"
+          aiConfidence = aiPrediction.confidence;
+
+          Logger.info(
+            'AI Priority: ${aiPriorityLabel} (confidence: ${(aiConfidence * 100).toStringAsFixed(1)}%), '
+            'Rule Score: ${(ruleUrgencyScore * 100).toStringAsFixed(1)}%, '
+            'Final Score: ${(finalUrgencyScore * 100).toStringAsFixed(1)}%',
+            tag: 'BeneficiaryRegistration',
+          );
+        } else {
+          Logger.warning(
+            'AI prediction returned null - using rule-based score only',
+            tag: 'BeneficiaryRegistration',
+          );
+        }
+      } catch (e) {
+        // AI call failed - silently fallback to rule-based (no error shown to user)
+        Logger.warning(
+          'AI priority prediction failed, using rule-based score: $e',
+          tag: 'BeneficiaryRegistration',
+        );
+        // finalUrgencyScore already = ruleUrgencyScore (safe fallback)
+      }
+
       // Create beneficiary model
       final beneficiary = BeneficiaryModel(
         beneficiaryId: '',
@@ -220,17 +290,28 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
             ? widget.data.selectedCategories.first
             : null,
         isPregnant: widget.data.isPregnant,
-        pregnancyTrimester: widget.data.isPregnant ? widget.data.pregnancyTrimester : null,
+        pregnancyTrimester: widget.data.isPregnant
+            ? widget.data.pregnancyTrimester
+            : null,
         childrenUnder5Count: widget.data.childrenUnder5Count,
         childrenAges: widget.data.childrenAges,
         isLivingAlone: widget.data.isLivingAlone,
         hasCaregiver: widget.data.hasCaregiver,
-        mobilityLevel: widget.data.selectedCategories.contains('elderly') ? widget.data.mobilityLevel : null,
-        disabilityType: widget.data.selectedCategories.contains('disabled') ? widget.data.disabilityType : null,
-        disabilitySeverity: widget.data.selectedCategories.contains('disabled') ? widget.data.disabilitySeverity : null,
+        mobilityLevel: widget.data.selectedCategories.contains('elderly')
+            ? widget.data.mobilityLevel
+            : null,
+        disabilityType: widget.data.selectedCategories.contains('disabled')
+            ? widget.data.disabilityType
+            : null,
+        disabilitySeverity: widget.data.selectedCategories.contains('disabled')
+            ? widget.data.disabilitySeverity
+            : null,
         usesAssistiveDevice: widget.data.usesAssistiveDevice,
         needsPersonalAssistance: widget.data.needsPersonalAssistance,
-        chronicIllnessType: widget.data.selectedCategories.contains('chronically_ill') ? widget.data.chronicIllnessType : null,
+        chronicIllnessType:
+            widget.data.selectedCategories.contains('chronically_ill')
+            ? widget.data.chronicIllnessType
+            : null,
         isOnMedication: widget.data.isOnMedication,
         needsRegularMedicalCare: widget.data.needsRegularMedicalCare,
         totalFamilySize: widget.data.totalFamilySize,
@@ -245,23 +326,28 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
         photoUrl: widget.data.photoUrl,
         registeredBy: currentUser.uid,
         createdAt: DateTime.now(),
-        urgencyScore: urgencyScore,
+        urgencyScore:
+            finalUrgencyScore, // Uses blended score (AI + rule) or rule-only if AI fails
       );
 
       // Save to Firestore
       final beneficiaryService = ref.read(beneficiaryServiceProvider);
-      final beneficiaryId = await beneficiaryService.createBeneficiary(beneficiary);
+      final beneficiaryId = await beneficiaryService.createBeneficiary(
+        beneficiary,
+      );
 
       if (beneficiaryId != null && mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const BeneficiaryListScreen()),
+          MaterialPageRoute(
+            builder: (context) => const BeneficiaryListScreen(),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -288,28 +374,37 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                     label: 'Total Family Size *',
                     icon: Icons.people,
                     keyboardType: TextInputType.number,
-                    validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Required' : null,
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
                     title: const Text('Is Female-Headed Household?'),
                     value: widget.data.isFemaleHeadedHousehold,
-                    onChanged: (value) => setState(() => widget.data.isFemaleHeadedHousehold = value),
+                    onChanged: (value) => setState(
+                      () => widget.data.isFemaleHeadedHousehold = value,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _buildDropdown<String>(
                     value: widget.data.incomeLevel,
                     label: 'Monthly Family Income *',
                     items: IncomeLevel.values.map((level) {
-                      return DropdownMenuItem(value: level.value, child: Text(level.label));
+                      return DropdownMenuItem(
+                        value: level.value,
+                        child: Text(level.label),
+                      );
                     }).toList(),
-                    onChanged: (value) => setState(() => widget.data.incomeLevel = value!),
+                    onChanged: (value) =>
+                        setState(() => widget.data.incomeLevel = value!),
                   ),
                   const SizedBox(height: 12),
                   SwitchListTile(
                     title: const Text('Currently Receiving Other Aid?'),
                     value: widget.data.currentlyReceivingOtherAid,
-                    onChanged: (value) => setState(() => widget.data.currentlyReceivingOtherAid = value),
+                    onChanged: (value) => setState(
+                      () => widget.data.currentlyReceivingOtherAid = value,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   _buildSectionHeader('Location', Icons.location_on),
@@ -317,9 +412,13 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                     value: widget.data.region,
                     label: 'Region *',
                     items: _regions.map((region) {
-                      return DropdownMenuItem(value: region, child: Text(region));
+                      return DropdownMenuItem(
+                        value: region,
+                        child: Text(region),
+                      );
                     }).toList(),
-                    onChanged: (value) => setState(() => widget.data.region = value!),
+                    onChanged: (value) =>
+                        setState(() => widget.data.region = value!),
                   ),
                   const SizedBox(height: 12),
                   _buildTextField(
@@ -338,7 +437,8 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                     onPressed: _getCurrentLocation,
                     icon: const Icon(Icons.gps_fixed),
                     label: Text(
-                      widget.data.latitude != null && widget.data.longitude != null
+                      widget.data.latitude != null &&
+                              widget.data.longitude != null
                           ? 'GPS: ${widget.data.latitude!.toStringAsFixed(4)}, ${widget.data.longitude!.toStringAsFixed(4)}'
                           : 'Capture GPS Coordinates',
                     ),
@@ -364,7 +464,10 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.file(widget.data.photoFile!, fit: BoxFit.cover),
+                        child: Image.file(
+                          widget.data.photoFile!,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     )
                   else
@@ -380,9 +483,16 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.camera_alt, size: 48, color: Colors.grey),
+                            Icon(
+                              Icons.camera_alt,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 8),
-                            Text('No photo captured', style: TextStyle(color: Colors.grey)),
+                            Text(
+                              'No photo captured',
+                              style: TextStyle(color: Colors.grey),
+                            ),
                           ],
                         ),
                       ),
@@ -391,7 +501,11 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                   ElevatedButton.icon(
                     onPressed: _capturePhoto,
                     icon: const Icon(Icons.camera),
-                    label: Text(widget.data.photoFile == null ? 'Capture Photo' : 'Retake Photo'),
+                    label: Text(
+                      widget.data.photoFile == null
+                          ? 'Capture Photo'
+                          : 'Retake Photo',
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[700],
                       foregroundColor: Colors.white,
@@ -439,7 +553,10 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
                         ? const CircularProgressIndicator(color: Colors.white)
                         : const Text(
                             'Register Beneficiary',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                   ),
                 ),
@@ -511,4 +628,3 @@ class _Step3FamilyLocationScreenState extends ConsumerState<Step3FamilyLocationS
     );
   }
 }
-
