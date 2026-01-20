@@ -85,7 +85,7 @@ Smart Aid Distribution is a comprehensive solution for managing aid distribution
    PRIORITY_AI_API_KEY=your_api_key (optional)
    ```
 
-   For detailed setup instructions, see [SETUP_ENV.md](SETUP_ENV.md)
+   
 
 4. **Configure Firebase**
    
@@ -135,7 +135,6 @@ For test coverage:
 flutter test --coverage
 ```
 
-See [TESTING_SETUP.md](TESTING_SETUP.md) for detailed testing guidelines.
 
 ## 📱 Platform Support
 
@@ -152,13 +151,7 @@ See [TESTING_SETUP.md](TESTING_SETUP.md) for detailed testing guidelines.
 - Firebase Security Rules for data access control
 - Role-based access control (RBAC)
 - Secure storage for offline credentials
-- Input validation and sanitization
-
-## 📖 Documentation
-
-- [SETUP_ENV.md](SETUP_ENV.md) - Environment setup guide
-- [TESTING_SETUP.md](TESTING_SETUP.md) - Testing documentation
-- [PROJECT_DEFENSE_TECHNICAL_ANALYSIS.md](PROJECT_DEFENSE_TECHNICAL_ANALYSIS.md) - Technical analysis
+- Input validation and sanitiz
 
 ## 🤝 Contributing
 
