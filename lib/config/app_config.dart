@@ -1,13 +1,14 @@
-class AppConfig {
-  static const String priorityAiBaseUrl = String.fromEnvironment(
-    'PRIORITY_AI_BASE_URL',
-    defaultValue: '',
-  );
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-  static const String priorityAiApiKey = String.fromEnvironment(
-    'PRIORITY_AI_API_KEY',
-    defaultValue: '',
-  );
+/// Application configuration loaded from .env file
+class AppConfig {
+  static String get priorityAiBaseUrl {
+    return dotenv.env['PRIORITY_AI_BASE_URL'] ?? '';
+  }
+
+  static String get priorityAiApiKey {
+    return dotenv.env['PRIORITY_AI_API_KEY'] ?? '';
+  }
 
   static bool get isPriorityAiEnabled => priorityAiBaseUrl.trim().isNotEmpty;
 }

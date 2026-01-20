@@ -3,19 +3,29 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'config/env_config.dart';
 import 'widgets/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize environment configuration (loads .env if available)
+
+  // Load environment variables from .env file
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    if (kDebugMode) {
+      debugPrint('Warning: Could not load .env file: $e');
+    }
+  }
+
+  // Initialize environment configuration
   await EnvConfig.initialize();
-  
+
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   // Enable offline persistence (caches data locally for offline access)
   // This allows the app to work offline by using cached data from Firestore
   // When offline:
@@ -37,12 +47,8 @@ void main() async {
       debugPrint('Persistence setup: $e');
     }
   }
-  
-  runApp(
-    const ProviderScope(
-      child: SmartAidApp(),
-    ),
-  );
+
+  runApp(const ProviderScope(child: SmartAidApp()));
 }
 
 class SmartAidApp extends StatelessWidget {
@@ -61,10 +67,7 @@ class SmartAidApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       // Set background color to prevent black screen
       builder: (context, child) {
-        return Container(
-          color: Colors.white,
-          child: child ?? const SizedBox(),
-        );
+        return Container(color: Colors.white, child: child ?? const SizedBox());
       },
     );
   }
