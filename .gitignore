@@ -1,9 +1,11 @@
 # Miscellaneous
 *.class
 *.log
-*.md
 *.pyc
 *.swp
+# Ignore all .md files except README.md
+*.md
+!README.md
 .DS_Store
 .atom/
 .buildlog/
@@ -56,3 +58,6 @@ ui-debug.log
 .env.local
 .env.production
 lib/config/cloudinary_config.dart
+
+# Cursor IDE
+.cursor/
