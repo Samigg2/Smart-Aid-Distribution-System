@@ -177,7 +177,7 @@ This project follows Dart/Flutter best practices:
 - Write unit tests for business logic
 - Document complex code sections
 
-## 🐛 Known Issues
+##  Known Issues
 
 - Some features may require internet connection for first-time setup
 - QR code scanning works best on mobile devices
