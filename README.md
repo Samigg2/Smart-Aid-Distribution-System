@@ -67,11 +67,11 @@ Different permissions exist for:
 
 | User Management                           | QR Code Generation                          | QR Scan                                 |
 | ----------------------------------------- | ------------------------------------------- | --------------------------------------- |
-| <img src="diagrams/user.jpg" width="250"> | <img src="diagrams/qrcode.jpg" width="250"> | <img src="diagrams/qr.jpg" width="250"> |
+| <img src="diagrams/user.jpg" width="250"> | <img src="diagrams/qr.jpg" width="250"> | <img src="diagrams/qrcode.jpg" width="250"> |
 
 | Export                                      | Distributed List                                 | Program Details                              |
 | ------------------------------------------- | ------------------------------------------------ | -------------------------------------------- |
-| <img src="diagrams/export.jpg" width="250"> | <img src="diagrams/destributed.jpg" width="250"> | <img src="diagrams/details.jpg" width="250"> |
+| <img src="diagrams/export.jpg" width="250"> | <img src="diagrams/distributed.jpg" width="250"> | <img src="diagrams/details.jpg" width="250"> |
 
 | Distribution Programs                         |
 | --------------------------------------------- |
@@ -178,5 +178,3 @@ flutter test
 Private project.
 
 ---
-
-If you want, I can also show you **3 small changes that make this README look like a serious open-source project (and stronger for scholarships like AIMS, GKS, or grad school applications)** without making it look AI-written.
