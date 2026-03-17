@@ -5,6 +5,7 @@ A Flutter-based mobile and web application for managing humanitarian aid distrib
 ## 📱 Overview
 
 Smart Aid Distribution is a comprehensive solution for managing aid distribution programs. It helps organizations efficiently register beneficiaries, classify them based on vulnerability criteria, create distribution programs, and track aid distribution records.
+![Alt text](diagrams/photo_2026-03-17_19-54-31.jpg)
 
 ### Key Features
 
