@@ -1,214 +1,120 @@
-# Smart Aid Distribution
+Smart Aid Distribution
+A Flutter web and mobile app we built for managing humanitarian aid distribution with intelligent beneficiary prioritization.
 
-A Flutter-based mobile and web application for managing humanitarian aid distribution with intelligent priority classification and beneficiary management.
+📱 Overview
+We created this app to help aid organizations register beneficiaries, figure out who needs help the most, and track distributions. It works offline on mobile (super important for field work) and syncs when you're back online. The web version is perfect for office work - admins can manage everything from a desktop browser.
 
-## 📱 Overview
+✨ What It Does
+Beneficiary Management - Register people with photos, GPS location, and vulnerability info
 
-Smart Aid Distribution is a comprehensive solution for managing aid distribution programs. It helps organizations efficiently register beneficiaries, classify them based on vulnerability criteria, create distribution programs, and track aid distribution records.
-![Alt text](diagrams/photo_2026-03-17_19-54-31.jpg)
+Priority Scoring - Automatically calculates who needs aid most urgently
+
+Distribution Programs - Create and manage aid programs with budgets
+
+QR Code System - Each beneficiary gets a scannable code for quick lookup
+
+Reports & Export - Export data to Excel for reporting
+
+User Roles - Admins and staff have different permissions
+
+🛠️ Built With
+Flutter + Riverpod (state management) - runs on web and mobile from same codebase
+
+Firebase (Auth + Firestore)
+
+Cloudinary (image storage)
+
+QR code generation + scanning
+
+📸 App Screenshots (14 Screens)
+Here's a complete tour of the app (works same on web and mobile):
+
 <div align="center">
-Login Page	Admin Dashboard	Beneficiary Form
-<img src="diagrams/photo_2026-03-17_19-54-31.jpg" width="250" alt="Login screen">	<img src="screenshots/dashboard.jpg" width="250" alt="Admin dashboard">	<img src="screenshots/beneficiary_form.jpg" width="250" alt="Beneficiary registration">
-Beneficiary QR Code	Distribution Programs	Program Details
-<img src="screenshots/qr_code.jpg" width="250" alt="QR code">	<img src="screenshots/programs_list.jpg" width="250" alt="Programs list">	<img src="screenshots/program_details.jpg" width="250" alt="Program details">
-Distributed List	User Management	Reports Page
-<img src="screenshots/distributions.jpg" width="250" alt="Distributions">	<img src="screenshots/user_management.jpg" width="250" alt="User management">	<img src="screenshots/reports.jpg" width="250" alt="Reports">
-Export Screen	
-<img src="screenshots/export.jpg" width="250" alt="Export">	
+1. Login Page	2. Admin Dashboard	3. Beneficiary Form (Page 1)
+<img src="diagrams/login.jpg" width="250" alt="Login screen">	<img src="diagrams/dashboard.jpg" width="250" alt="Admin dashboard">	<img src="diagrams/beneficiary_form1.jpg" width="250" alt="Beneficiary form page 1">
+4. Beneficiary Form (Page 2)	5. Beneficiary Form (Page 3)	6. Beneficiary Form (Page 4)
+<img src="diagrams/beneficiary_form2.jpg" width="250" alt="Beneficiary form page 2">	<img src="diagrams/beneficiary_form3.jpg" width="250" alt="Beneficiary form page 3">	<img src="diagrams/beneficiary_form4.jpg" width="250" alt="Beneficiary form page 4">
+7. Beneficiary QR Code	8. Distribution Programs	9. Program Details
+<img src="diagrams/qr_code.jpg" width="250" alt="QR code">	<img src="diagrams/programs_list.jpg" width="250" alt="Programs list">	<img src="diagrams/program_details.jpg" width="250" alt="Program details">
+10. Distributed List	11. User Management	12. Reports Page
+<img src="diagrams/distributions.jpg" width="250" alt="Distributions">	<img src="diagrams/user_management.jpg" width="250" alt="User management">	<img src="diagrams/reports.jpg" width="250" alt="Reports">
+13. Export Screen	14. [Your 14th screen]	
+<img src="diagrams/export.jpg" width="250" alt="Export">	<img src="diagrams/screen14.jpg" width="250" alt="Screen 14">	
 </div>
+🚀 Getting Started
+Prerequisites
+Flutter SDK (^3.9.2)
 
-### Key Features
+Firebase project
 
-- **Beneficiary Management**
-  - Comprehensive beneficiary registration with photo capture
-  - Multiple vulnerable category classification (pregnant women, lactating mothers, children under 5, elderly, disabled, chronically ill)
-  - Location tracking with GPS coordinates
-  - QR code generation for easy beneficiary identification
+Cloudinary account (free tier works)
 
-- **Priority Classification**
-  - AI-powered priority scoring (optional)
-  - Rule-based vulnerability assessment
-  - Automatic urgency score calculation
+Quick Setup
+Clone and install
 
-- **Distribution Program Management**
-  - Create and manage distribution programs
-  - Target specific vulnerable categories
-  - Track budgets and beneficiary limits
-  - Program status management (draft, active, paused, completed, cancelled)
+bash
+git clone <your-repo>
+cd smartaid
+flutter pub get
+Environment variables
 
-- **Distribution Tracking**
-  - Record aid distributions
-  - Link distributions to beneficiaries and programs
-  - QR code scanning for quick beneficiary lookup
-  - Comprehensive distribution history
+bash
+cp .env.example .env
+# Add your Cloudinary and API keys
+Firebase setup
 
-- **User Management**
-  - Role-based access control (Admin/Staff)
-  - User authentication with Firebase Auth
-  - User activity tracking
+Create project at Firebase Console
 
-- **Data Export**
-  - Export beneficiary and distribution data
-  - Excel/CSV format support
-  - Offline data access
+Enable Email/Password auth
 
-- **Offline Support**
-  - Firebase Firestore offline persistence
-  - Works without internet connection
-  - Automatic data synchronization
+Set up Firestore
 
-## 🚀 Getting Started
+Download config files
 
-### Prerequisites
+Run flutterfire configure
 
-- Flutter SDK (^3.9.2 or higher)
-- Dart SDK
-- Firebase project with Firestore enabled
-- Cloudinary account (for photo storage)
-- (Optional) Priority AI API access
+Run it
 
-### Installation
+bash
+# For mobile
+flutter run
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd smartaid
-   ```
-
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
-
-3. **Set up environment variables**
-   
-   Create a `.env` file in the root directory (see `.env.example` for template):
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit `.env` with your credentials:
-   ```env
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
-   PRIORITY_AI_BASE_URL=https://your-api-url.com (optional)
-   PRIORITY_AI_API_KEY=your_api_key (optional)
-   ```
-
-   For detailed setup instructions, see [SETUP_ENV.md](SETUP_ENV.md)
-
-4. **Configure Firebase**
-   
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Enable Authentication (Email/Password)
-   - Enable Firestore Database
-   - Add your app to Firebase and download `google-services.json` (Android) or `GoogleService-Info.plist` (iOS)
-   - Run `flutterfire configure` to generate Firebase configuration files
-
-5. **Run the application**
-   ```bash
-   flutter run
-   ```
-
-## 📁 Project Structure
-
-```
+# For web
+flutter run -d chrome
+📁 Project Structure (how we organized it)
+text
 lib/
-├── config/          # Configuration files (env, app config)
-├── models/          # Data models
-├── providers/       # Riverpod providers for state management
-├── screens/         # UI screens
-├── services/        # Business logic services
-├── utils/           # Utility functions and validators
-└── widgets/         # Reusable widgets
-```
-
-## 🛠️ Technology Stack
-
-- **Framework**: Flutter (Dart)
-- **State Management**: Riverpod
-- **Backend**: Firebase (Firestore, Authentication)
-- **Image Storage**: Cloudinary
-- **Location Services**: Geolocator
-- **QR Code**: qr_flutter, mobile_scanner
-- **Environment Variables**: flutter_dotenv
-
-## 🧪 Testing
-
-Run tests with:
-```bash
+├── screens/     # All UI screens (login, dashboard, forms, etc)
+├── widgets/     # Reusable buttons, cards, etc
+├── models/      # Data classes
+├── providers/   # Riverpod state
+├── services/    # Firebase, API calls
+├── utils/       # Helper functions
+└── config/      # Environment configs
+🧪 Testing
+bash
 flutter test
-```
+📱 Works On
+✅ Android (main target for field workers)
 
-For test coverage:
-```bash
-flutter test --coverage
-```
+✅ iOS (works great)
 
-See [TESTING_SETUP.md](TESTING_SETUP.md) for detailed testing guidelines.
+✅ Web (perfect for office/admin work)
 
-## 📱 Platform Support
+⚠️ Windows (most features work)
 
-- ✅ Android
-- ✅ iOS
-- ✅ Web
-- ✅ Windows (partial)
-- ✅ Linux (partial)
-- ✅ macOS (partial)
+🤝 Contributing
+Found a bug? Want to add something? PRs welcome!
 
-## 🔒 Security
+Fork it
 
-- Environment variables for sensitive API keys
-- Firebase Security Rules for data access control
-- Role-based access control (RBAC)
-- Secure storage for offline credentials
-- Input validation and sanitization
+Create branch (git checkout -b feature/cool-stuff)
 
-## 📖 Documentation
+Commit (git commit -m 'Added cool stuff')
 
-- [SETUP_ENV.md](SETUP_ENV.md) - Environment setup guide
-- [TESTING_SETUP.md](TESTING_SETUP.md) - Testing documentation
-- [PROJECT_DEFENSE_TECHNICAL_ANALYSIS.md](PROJECT_DEFENSE_TECHNICAL_ANALYSIS.md) - Technical analysis
+Push (git push origin feature/cool-stuff)
 
-## 🤝 Contributing
+Open PR
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 Code Style
-
-This project follows Dart/Flutter best practices:
-- Use meaningful variable and function names
-- Keep functions short and focused
-- Follow SOLID principles
-- Write unit tests for business logic
-- Document complex code sections
-
-##  Known Issues
-
-- Some features may require internet connection for first-time setup
-- QR code scanning works best on mobile devices
-- Large beneficiary lists may require pagination for optimal performance
-
-## 📄 License
-
-This project is private and proprietary.
-
-## 👥 Authors
-
-Smart Aid Development Team
-
-## 🙏 Acknowledgments
-
-- Flutter team for the amazing framework
-- Firebase for backend services
-- Cloudinary for image storage
-- All open-source contributors
-
----
-
-**Note**: This application is designed for humanitarian aid organizations. Ensure compliance with data protection regulations (GDPR, local privacy laws) when handling beneficiary information.
+📄 License
+Private project for now.
