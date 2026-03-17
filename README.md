@@ -1,107 +1,196 @@
-Smart Aid Distribution
-A Flutter web and mobile app we built for managing humanitarian aid distribution with intelligent beneficiary prioritization.
+---
 
-Overview
-We created this app to help aid organizations register beneficiaries, figure out who needs help the most, and track distributions. It works offline on mobile (super important for field work) and syncs when you're back online. The web version is perfect for office work - admins can manage everything from a desktop browser.
+# Smart Aid Distribution
 
-What It Does
-Beneficiary Management - Register people with photos, GPS location, and vulnerability info
+A **Flutter web and mobile application** for managing humanitarian aid distribution with intelligent beneficiary prioritization.
 
-Priority Scoring - Automatically calculates who needs aid most urgently
+---
 
-Distribution Programs - Create and manage aid programs with budgets
+# Overview
 
-QR Code System - Each beneficiary gets a scannable code for quick lookup
+Smart Aid Distribution helps aid organizations:
 
-Reports & Export - Export data to Excel for reporting
+* Register beneficiaries
+* Prioritize the most vulnerable people
+* Track aid distributions
+* Manage programs and reporting
 
-User Roles - Admins and staff have different permissions
+The system supports **offline mobile usage**, which is critical for field workers. Data automatically **syncs when internet becomes available**.
 
-Built With
-Flutter + Riverpod (state management) - runs on web and mobile from same codebase
+The **web version** is designed for administrators to manage operations from a desktop browser.
 
-Firebase (Auth + Firestore)
+---
 
-Cloudinary (image storage)
+# Features
 
-QR code generation + scanning
+### Beneficiary Management
 
-App Screenshots
-Here's a complete tour of the app:
+Register beneficiaries with:
 
-<div align="center">
-Login Page	Admin Dashboard	Beneficiary Form (Page 1)
-<img src="diagrams/login.jpg" width="250">	<img src="diagrams/admin.jpg" width="250">	<img src="diagrams/fr1.jpg" width="250">
-Beneficiary Form (Page 2)	Beneficiary Form (Page 3)	Beneficiary Form (Page 4)
-<img src="diagrams/fr2.jpg" width="250">	<img src="diagrams/fr3.jpg" width="250">	<img src="diagrams/fr4.jpg" width="250">
-User Management	QR Code Generation	QR Code Scan
-<img src="diagrams/user.jpg" width="250">	<img src="diagrams/qrcode.jpg" width="250">	<img src="diagrams/qr.jpg" width="250">
-Export Screen	Distributed List	Program Details
-<img src="diagrams/export.jpg" width="250">	<img src="diagrams/destributed.jpg" width="250">	<img src="diagrams/details.jpg" width="250">
-Distribution Programs		
-<img src="diagrams/programs.jpg" width="250">		
-</div>
-Getting Started
-Prerequisites
-Flutter SDK (^3.9.2)
+* Photos
+* GPS location
+* Vulnerability information
 
-Firebase project
+### Priority Scoring
 
-Cloudinary account (free tier works)
+Automatically calculates **who should receive aid first** based on vulnerability factors.
 
-Quick Setup
-Clone and install
+### Distribution Programs
 
-bash
+Create and manage aid programs with budgets and beneficiary lists.
+
+### QR Code System
+
+Each beneficiary receives a **unique QR code** for fast identification during aid distribution.
+
+### Reports & Data Export
+
+Export distribution data to **Excel for reporting and auditing**.
+
+### User Roles
+
+Different permissions for:
+
+* Admin users
+* Field staff
+
+---
+
+# Technology Stack
+
+| Technology     | Purpose                                   |
+| -------------- | ----------------------------------------- |
+| Flutter        | Cross-platform mobile and web development |
+| Riverpod       | State management                          |
+| Firebase Auth  | User authentication                       |
+| Firestore      | Database                                  |
+| Cloudinary     | Image storage                             |
+| QR Code System | Beneficiary identification                |
+
+---
+
+# Application Screenshots
+
+| Login                                      | Admin Dashboard                            | Beneficiary Form (Page 1)                |
+| ------------------------------------------ | ------------------------------------------ | ---------------------------------------- |
+| <img src="diagrams/login.jpg" width="250"> | <img src="diagrams/admin.jpg" width="250"> | <img src="diagrams/fr1.jpg" width="250"> |
+
+| Beneficiary Form (Page 2)                | Beneficiary Form (Page 3)                | Beneficiary Form (Page 4)                |
+| ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| <img src="diagrams/fr2.jpg" width="250"> | <img src="diagrams/fr3.jpg" width="250"> | <img src="diagrams/fr4.jpg" width="250"> |
+
+| User Management                           | QR Code Generation                          | QR Code Scan                            |
+| ----------------------------------------- | ------------------------------------------- | --------------------------------------- |
+| <img src="diagrams/user.jpg" width="250"> | <img src="diagrams/qrcode.jpg" width="250"> | <img src="diagrams/qr.jpg" width="250"> |
+
+| Export Screen                               | Distributed List                                 | Program Details                              |
+| ------------------------------------------- | ------------------------------------------------ | -------------------------------------------- |
+| <img src="diagrams/export.jpg" width="250"> | <img src="diagrams/destributed.jpg" width="250"> | <img src="diagrams/details.jpg" width="250"> |
+
+| Distribution Programs                         |
+| --------------------------------------------- |
+| <img src="diagrams/programs.jpg" width="250"> |
+
+---
+
+# Getting Started
+
+## Prerequisites
+
+* Flutter SDK **^3.9.2**
+* Firebase project
+* Cloudinary account *(free tier works)*
+
+---
+
+# Installation
+
+### 1. Clone the Repository
+
+```bash
 git clone <your-repo>
 cd smartaid
 flutter pub get
-Environment variables
+```
 
-bash
+### 2. Environment Variables
+
+```bash
 cp .env.example .env
-# Add your Cloudinary and API keys
-Firebase setup
+```
 
-Create project at Firebase Console
+Add your **Cloudinary credentials and API keys** inside `.env`.
 
-Enable Email/Password auth
+---
 
-Set up Firestore
+### 3. Firebase Setup
 
-Download config files
+1. Create a project in **Firebase Console**
+2. Enable **Email/Password Authentication**
+3. Create a **Firestore Database**
+4. Download configuration files
+5. Run:
 
-Run flutterfire configure
+```bash
+flutterfire configure
+```
 
-Run it
+---
 
-bash
-# For mobile
+# Run the Application
+
+### Mobile
+
+```bash
 flutter run
+```
 
-# For web
+### Web
+
+```bash
 flutter run -d chrome
-Project Structure
-text
+```
+
+---
+
+# Project Structure
+
+```
 lib/
-├── screens/     # All UI screens (login, dashboard, forms, etc)
-├── widgets/     # Reusable buttons, cards, etc
-├── models/      # Data classes
-├── providers/   # Riverpod state
-├── services/    # Firebase, API calls
-├── utils/       # Helper functions
-└── config/      # Environment configs
-Testing
-bash
+├── screens/      # UI screens (login, dashboard, forms)
+├── widgets/      # Reusable components
+├── models/       # Data models
+├── providers/    # Riverpod state management
+├── services/     # Firebase and API services
+├── utils/        # Helper utilities
+└── config/       # Environment configurations
+```
+
+---
+
+# Testing
+
+Run automated tests:
+
+```bash
 flutter test
-Works On
-✅ Android (main target for field workers)
+```
 
-✅ iOS (works great)
+---
 
-✅ Web (perfect for office/admin work)
+# Platform Support
 
-⚠️ Windows (most features work)
+| Platform | Status                          |
+| -------- | ------------------------------- |
+| Android  | ✅ Main target for field workers |
+| iOS      | ✅ Fully supported               |
+| Web      | ✅ Ideal for admin use           |
+| Windows  | ⚠️ Most features supported      |
 
-License
+---
+
+# License
+
 Private project.
+
+---
