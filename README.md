@@ -6,7 +6,16 @@ A Flutter-based mobile and web application for managing humanitarian aid distrib
 
 Smart Aid Distribution is a comprehensive solution for managing aid distribution programs. It helps organizations efficiently register beneficiaries, classify them based on vulnerability criteria, create distribution programs, and track aid distribution records.
 ![Alt text](diagrams/photo_2026-03-17_19-54-31.jpg)
-<div align="center"> <table> <tr> <td align="center" width="200"> <img src="diagrams/photo_2026-03-17_19-54-31.jpg" width="180" alt="Registration Form"><br> <sub><b>Beneficiary Registration</b></sub><br> <sub>Form with photo & GPS</sub> </td> <td align="center" width="200"> <img src="diagrams/photo_2026-03-17_19-54-31.jpg" width="180" alt="QR Code"><br> <sub><b>QR Code Profile</b></sub><br> <sub>Each beneficiary gets a unique code</sub> </td> <td align="center" width="200"> <img src="screenshots/priority.jpg" width="180" alt="Priority List"><br> <sub><b>Priority Scoring</b></sub><br> <sub>Vulnerability scores at a glance</sub> </td> </tr> <tr> <td align="center" width="200"> <img src="screenshots/scanner.jpg" width="180" alt="QR Scanner"><br> <sub><b>Distribution Scanner</b></sub><br> <sub>2-second beneficiary lookup</sub> </td> <td align="center" width="200"> <img src="screenshots/programs.jpg" width="180" alt="Programs"><br> <sub><b>Program Management</b></sub><br> <sub>Track budgets & beneficiaries</sub> </td> <td align="center" width="200"> <img src="screenshots/offline.jpg" width="180" alt="Offline Mode"><br> <sub><b>Offline Mode</b></sub><br> <sub>Works without internet</sub> </td> </tr> </table> </div>
+<div align="center">
+Login Page	Admin Dashboard	Beneficiary Form
+<img src="diagrams/photo_2026-03-17_19-54-31.jpg" width="250" alt="Login screen">	<img src="screenshots/dashboard.jpg" width="250" alt="Admin dashboard">	<img src="screenshots/beneficiary_form.jpg" width="250" alt="Beneficiary registration">
+Beneficiary QR Code	Distribution Programs	Program Details
+<img src="screenshots/qr_code.jpg" width="250" alt="QR code">	<img src="screenshots/programs_list.jpg" width="250" alt="Programs list">	<img src="screenshots/program_details.jpg" width="250" alt="Program details">
+Distributed List	User Management	Reports Page
+<img src="screenshots/distributions.jpg" width="250" alt="Distributions">	<img src="screenshots/user_management.jpg" width="250" alt="User management">	<img src="screenshots/reports.jpg" width="250" alt="Reports">
+Export Screen	
+<img src="screenshots/export.jpg" width="250" alt="Export">	
+</div>
 
 ### Key Features
 
